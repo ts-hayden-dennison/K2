@@ -20,15 +20,17 @@ ITERATIONS = 10
 # How far objects can penetrate
 BIAS = 0.0
 # Width and height of player box
-PLAYERSIZE = 14
+PLAYERSIZE = 13
 # Walking speed of the player
-PLAYERSPEED = 1000
+PLAYERGROUNDSPEED = 250
+# Airspeed of the player
+PLAYERAIRSPEED = 250
 # Initial jump velocity
-PLAYERJUMPHEIGHT = 10000
+PLAYERJUMPHEIGHT = 3000
 # How heavy the player is
-PLAYERMASS = 90
+PLAYERMASS = 20
 # Rubber or ice! :)
-PLAYERFRICTION = 1.0
+PLAYERFRICTION = 1
 # How bouncy the player is
 PLAYERBOUNCE = 0.5
 # The maximum walking velocity of the player
@@ -46,16 +48,16 @@ DOWNKEY = pygame.K_DOWN
 # The maximum amount of vertical velocity; think of Mario: hold down for higher jumps
 JUMPLENGTHEN = 25
 # How many frames between each action button event
-ACTIONLENGTH = 0
+ACTIONLENGTH = 1
 # The rotation speed of the player
-ROTSPEED = 2
+ROTSPEED = 1.5
 # How fast the player can rotate
-MAXROTSPEED = 360
+MAXROTSPEED = 180
 # The difference from the sides of the player's body at which
 # the player cannot jump off a side of a polygon.
-JUMPINGDIFFERENCE = 0
+JUMPINGDIFFERENCE = 1
 # How much the player's running speed affects his jumping height
-HORIZONTALJUMPEFFECT = 10
+HORIZONTALJUMPEFFECT = 5
 # Collision types. Don't set one to zero, or the physics engine will crash, and therefore, the game.
 GROUNDCOLLISIONTYPE = 2
 GOALCOLLISIONTYPE = 3
@@ -74,4 +76,4 @@ BACKGROUNDAWESOMENESS = 200
 # Sizes of rope segments
 ROPESIZE = 5
 # This determines how "stiff" the rope feels
-ROPESTIFFNESS = 3
+ROPESTIFFNESS = 2

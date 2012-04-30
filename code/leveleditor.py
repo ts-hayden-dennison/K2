@@ -136,9 +136,8 @@ def editClimber(climber, index):
 			elif e.key == pygame.K_BACKSPACE:
 				return
 		elif e.type == pygame.MOUSEBUTTONUP:
-			print leveldata[index]
-			print objects.keys()[index]
 			leveldata[index][1] = last.int_tuple
+			world.update()
 			return
 		elif e.type == pygame.MOUSEMOTION:
 			last += e.pos-last
@@ -388,9 +387,25 @@ while True:
 			elif e.key == pygame.K_c:
 				world.clear()
 				leveldata = []
-			elif e.key == pygame.K_r:
+				objects = {}
+			elif e.key == pygame.K_SPACE:
 				world.clear()
 				loadLevel(world, leveldata)
+				while world.complete == False:
+					e = pygame.event.poll()
+					if e.type == pygame.QUIT:
+						pygame.quit()
+						exit()
+					elif e.type == pygame.KEYDOWN:
+						if e.key == pygame.K_ESCAPE:
+							pygame.quit()
+							exit()
+						elif e.key == pygame.K_BACKSPACE:
+							break
+					screen.blit(background, (0, 0))
+					world.update()
+					clock.tick(FPS)
+					pygame.display.update()
 		elif e.type == pygame.MOUSEBUTTONDOWN:
 			if e.pos[0] < WIDTH:
 				if e.button == 1:

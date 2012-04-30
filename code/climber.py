@@ -13,16 +13,13 @@ from pymunk import Vec2d, SlideJoint
 # Optional arguments: collision type, size
 class Climber(Object):
 	def __init__(self, world, position, collision=PLAYERCOLLISIONTYPE, size=PLAYERSIZE):
-		global PLAYERSPEED, PLAYERJUMPHEIGHT, PLAYERMASS, PLAYERFRICTION, PLAYERBOUNCE, PLAYERCOLLISIONTYPE, ACTIONLENGTH, GROUNDCOLLISIONTYPE
+		global PLAYERMASS, PLAYERFRICTION, PLAYERBOUNCE, PLAYERCOLLISIONTYPE, ACTIONLENGTH, GROUNDCOLLISIONTYPE
 		pygame.sprite.Sprite.__init__(self)
-		self.size = size
-		self.speed = PLAYERSPEED
-		self.jumpHeight = PLAYERJUMPHEIGHT
 		self.canJump = False
 		self.canLengthenJump = False
 		self.jumpLengthen = 1
 		self.actionTimer = ACTIONLENGTH
-		self.shape = createBall(position, self.size, PLAYERMASS, PLAYERFRICTION, PLAYERBOUNCE)
+		self.shape = createBall(position, PLAYERSIZE, PLAYERMASS, PLAYERFRICTION, PLAYERBOUNCE)
 		self.shape.collision_type = collision
 		self.death = False
 		self.setupCollisionHandlers(world)
@@ -84,24 +81,32 @@ class Climber(Object):
 		global ROTSPEED, MAXROTSPEED, RIGHTKEY, LEFTKEY, JUMPKEY, ACTIONKEY, JUMPLENGTHEN, ACTIONLENGTH, MAXSPEED, PLAYERFRICTION
 		keys = pygame.key.get_pressed()
 		print self.canJump
-		vec = pm.Vec2d(0, 0)
-		if keys[RIGHTKEY]:
-			vec.x = self.speed
-			self.shape.body.angular_velocity += ROTSPEED
-		if keys[LEFTKEY]:
-			vec.x = -self.speed
-			self.shape.body.angular_velocity -= ROTSPEED
+		vec = self.shape.body.velocity/10
+		if self.canJump:
+			if keys[RIGHTKEY]:
+				vec.x = PLAYERGROUNDSPEED
+				self.shape.body.angular_velocity += ROTSPEED
+			if keys[LEFTKEY]:
+				vec.x = -PLAYERGROUNDSPEED
+				self.shape.body.angular_velocity -= ROTSPEED
+		else:
+			if keys[RIGHTKEY]:
+				vec.x = PLAYERAIRSPEED
+				self.shape.body.angular_velocity += ROTSPEED
+			if keys[LEFTKEY]:
+				vec.x = -PLAYERAIRSPEED
+				self.shape.body.angular_velocity -= ROTSPEED
 		# Do other stuff
 		if keys[JUMPKEY]:
 			#print 'Read the up key'
 			#print '*'*20
 			if self.canJump == True:
-				vec.y = -(self.jumpHeight+abs(vec.x*HORIZONTALJUMPEFFECT))
+				vec.y = -(PLAYERJUMPHEIGHT+abs(vec.x*HORIZONTALJUMPEFFECT))
 				self.canJump = False
 				self.canLengthenJump = True
 			elif self.canLengthenJump == True:
 				if self.shape.body.velocity.y <= JUMPLENGTHEN:
-					vec.y = -(self.jumpHeight/self.jumpLengthen)
+					vec.y = -(PLAYERJUMPHEIGHT/self.jumpLengthen)
 					self.jumpLengthen += 1
 					if self.jumpLengthen >= JUMPLENGTHEN:
 						self.canLengthenJump = False
