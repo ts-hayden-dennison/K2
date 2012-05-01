@@ -14,20 +14,20 @@ from util import *
 ###############################################################################
 # INITIALIZATION
 pygame.init()
-screen = pygame.display.set_mode((WIDTH, HEIGHT))
+screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.DOUBLEBUF)
 pygame.display.set_caption('K2')
 clock = pygame.time.Clock()
-background = pygame.Surface((WIDTH, HEIGHT))
-background.fill(BACKGROUNDCOLOR)
-background.convert()
-for i in range(0, BACKGROUNDAWESOMENESS):
-	choice = random.choice(('rect', 'circle', 'line'))
-	if choice == 'rect':
-		pygame.draw.rect(background, randomColor(), randomRect())
-	elif choice == 'circle':
-		pygame.draw.circle(background, randomColor(), randomPos(), random.randint(5, 200))
-	elif choice == 'line':
-		pygame.draw.line(background, randomColor(), randomPos(), randomPos(), random.randint(1, 10))
+background = imgload('./images/1.png')
+#background.fill(BACKGROUNDCOLOR)
+#background.convert()
+#for i in range(0, BACKGROUNDAWESOMENESS):
+#	choice = random.choice(('rect', 'circle', 'line'))
+#	if choice == 'rect':
+#		pygame.draw.rect(background, randomColor(), randomRect())
+#	elif choice == 'circle':
+#		pygame.draw.circle(background, randomColor(), randomPos(), random.randint(5, 200))
+#	elif choice == 'line':
+#		pygame.draw.line(background, randomColor(), randomPos(), randomPos(), random.randint(1, 10))
 levels = loadLevels()
 currentlevel = 0
 if '-nosounds' in argv:

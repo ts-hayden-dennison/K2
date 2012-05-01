@@ -54,7 +54,7 @@ ACTIONLENGTH = 1
 # The rotation speed of the player
 ROTSPEED = 1.5
 # How fast the player can rotate
-MAXROTSPEED = 180
+MAXROTSPEED = 90
 # The difference from the sides of the player's body at which
 # the player cannot jump off a side of a polygon.
 JUMPINGDIFFERENCE = 1

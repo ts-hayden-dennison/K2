@@ -4,7 +4,7 @@
 from code import K2
 from sys import argv
 if len(argv) > 1:
-	if argv[1] == '-leveleditor':
+	if '-leveleditor' in argv:
 		from code import leveleditor
 		leveleditor.main()
 

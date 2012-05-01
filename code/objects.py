@@ -36,10 +36,6 @@ class Block(Object):
 		else:
 			world.space.add(self.shape.body, self.shape)
 		return
-	def Draw(self, world):
-		pygame.draw.polygon(world.screen, (50, 255, 50), self.shape.get_points())
-		pygame.draw.polygon(world.screen, (10, 10, 10), self.shape.get_points(), 4)
-		return
 
 # A simple convex polygon that you can stand on.
 # Pass it a world, position, and some vertices (given in local coordinates from the position
@@ -57,10 +53,6 @@ class Poly(Object):
 		else:
 			world.space.add(self.shape.body, self.shape)
 		return
-	def Draw(self, world):
-		pygame.draw.polygon(world.screen, (50, 255, 50), self.shape.get_points())
-		pygame.draw.polygon(world.screen, (0, 0, 0), self.shape.get_points(), 4)
-		return
 
 # A circle
 # Pass it a world, position, and radius
@@ -76,10 +68,6 @@ class Circle(Object):
 			world.space.add(self.shape.body, self.shape)
 		else:
 			world.space.add_static(self.shape)
-		return
-	def Draw(self, world):
-		pygame.draw.circle(world.screen, (50, 255, 50), self.shape.body.position.int_tuple, int(self.shape.radius))
-		pygame.draw.circle(world.screen, (0, 0, 0), self.shape.body.position.int_tuple, int(self.shape.radius), 4)
 		return
 
 # A dynamic rope that the player can swing on.

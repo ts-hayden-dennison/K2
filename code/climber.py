@@ -65,13 +65,11 @@ class Climber(Object):
 		global JUMPINGDIFFERENCE
 		keys = pygame.key.get_pressed()
 		bb = self.shape.cache_bb() 
-		pygame.draw.rect(world.screen, (255, 255, 255), (bb.left, bb.top, bb.right-bb.left, bb.bottom-bb.top), 1)
 		for shape in arbiter.shapes[0:]:
 			for contact in arbiter.contacts:
 				if contact.position.y > self.shape.body.position.y:
 					if contact.position.x >= bb.left+JUMPINGDIFFERENCE and contact.position.x <= bb.right-JUMPINGDIFFERENCE:
 						self.canJump = True
-						pygame.draw.circle(world.screen, (255, 255, 0), contact.position.int_tuple, 3)
 		return True
 	def decreaseActionTimer(self):
 		if self.actionTimer > 0:
@@ -80,7 +78,6 @@ class Climber(Object):
 	def Do(self, world):
 		global ROTSPEED, MAXROTSPEED, RIGHTKEY, LEFTKEY, JUMPKEY, ACTIONKEY, JUMPLENGTHEN, ACTIONLENGTH, MAXSPEED, PLAYERFRICTION
 		keys = pygame.key.get_pressed()
-		print self.canJump
 		vec = self.shape.body.velocity/10
 		if self.ropejoint != None:
 			if keys[RIGHTKEY]:
@@ -160,6 +157,8 @@ class Climber(Object):
 	def Draw(self, world):
 		#print self.shape.body.angle
 		newimg = pygame.transform.rotate(world.getImage('felix'), self.shape.body.angle*-180/3.14)
+		newimg.convert()
+		newimg.set_alpha(230)
 		world.screen.blit(newimg, (self.shape.body.position-Vec2d(newimg.get_width()/2, newimg.get_height()/2).int_tuple))
 		#world.screen.blit(self.image, self.shape.body.position.int_tuple)
 		#pygame.draw.circle(world.screen, (0, 255, 0), self.shape.body.position.int_tuple, int(self.shape.radius))

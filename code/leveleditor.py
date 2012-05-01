@@ -21,8 +21,16 @@ clock = pygame.time.Clock()
 space = pymunk.Space
 world = World()
 CLIPPINGRADIUS = 5
-background = pygame.Surface((WIDTH+28, HEIGHT))
-background.fill((0, 0, 0))
+images = loadImages()
+for item in images:
+	if item in argv:
+		background = item
+		break
+try:
+	background = background
+except:
+	background = pygame.Surface((WIDTH+28, HEIGHT))
+	background.fill((0, 0, 0))
 leveldata = []
 objects = {}
 class Menu():
