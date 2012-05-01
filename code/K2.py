@@ -11,7 +11,6 @@ from objects import *
 from constants import *
 from climber import *
 from util import *
-from camera import *
 ###############################################################################
 # INITIALIZATION
 pygame.init()
@@ -24,7 +23,7 @@ background.convert()
 for i in range(0, BACKGROUNDAWESOMENESS):
 	choice = random.choice(('rect', 'circle', 'line'))
 	if choice == 'rect':
-		pygame.draw.rect(background, randomColor(), (randomPos(), randomPos()))
+		pygame.draw.rect(background, randomColor(), randomRect())
 	elif choice == 'circle':
 		pygame.draw.circle(background, randomColor(), randomPos(), random.randint(5, 200))
 	elif choice == 'line':
@@ -74,6 +73,7 @@ class World():
 		self.clear()
 		if sound:
 			self.sounds = loadSounds()
+		self.images = loadImages()
 		self.screen = screen
 	# Just calls other methods and updates the timer.
 	def update(self):
@@ -115,6 +115,12 @@ class World():
 	def playSound(self, name):
 		try:
 			self.sounds[name].play()
+		except:
+			pass
+		return
+	def getImage(self, name):
+		try:
+			return self.images[name]
 		except:
 			pass
 		return

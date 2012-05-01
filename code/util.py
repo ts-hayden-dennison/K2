@@ -25,7 +25,7 @@ def randomColor():
 def randomPos():
 	return (random.randint(0, WIDTH), random.randint(0, HEIGHT))
 def randomRect():
-	return pygame.Rect(randomPos(), randomPos(), randomPos(), randomPos())
+	return pygame.Rect(randomPos(), randomPos())
 
 def loadLevel(world, data):
 	# Loop through commands and run the needed methods
@@ -34,6 +34,7 @@ def loadLevel(world, data):
 		for i in command[1:]:
 			string = string+", "+i.__str__()
 		string = string+")"
+		print string
 		exec(string) 
 	return
 
@@ -44,11 +45,16 @@ def loadSounds():
 		sounds[sound[0:-4]] = pygame.mixer.Sound(os.path.join(SOUNDFOLDER, sound))
 	return sounds
 
+def loadImages():
+	# Loads all images in the 'images' subfolder
+	images = {}
+	for image in os.listdir(os.path.join('.', IMAGEFOLDER)):
+		images[image[0:-4]] = imgload(os.path.join(IMAGEFOLDER, image))
+	return images
+
 def imgload(filename, colorkey=(255, 255, 255)):
-	path = os.path.join('.', IMAGEFOLDER)
-	path = os.path.join(path, filename)
 	try:
-		image = pygame.image.load(path)
+		image = pygame.image.load(filename)
 	except:
 		raise SystemError, "Could not load " + path
 	image.set_colorkey(colorkey)

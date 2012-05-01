@@ -22,17 +22,19 @@ BIAS = 0.0
 # Width and height of player box
 PLAYERSIZE = 13
 # Walking speed of the player
-PLAYERGROUNDSPEED = 250
+PLAYERGROUNDSPEED = 260
+# Speed of the player when using ropes
+PLAYERROPESPEED = 400
 # Airspeed of the player
-PLAYERAIRSPEED = 250
+PLAYERAIRSPEED = 100
 # Initial jump velocity
-PLAYERJUMPHEIGHT = 3000
+PLAYERJUMPHEIGHT = 4000
 # How heavy the player is
-PLAYERMASS = 20
+PLAYERMASS = 30
 # Rubber or ice! :)
 PLAYERFRICTION = 1
 # How bouncy the player is
-PLAYERBOUNCE = 0.5
+PLAYERBOUNCE = 0.4
 # The maximum walking velocity of the player
 #MAXSPEED = 3000
 # The key set for right movement
@@ -56,8 +58,10 @@ MAXROTSPEED = 180
 # The difference from the sides of the player's body at which
 # the player cannot jump off a side of a polygon.
 JUMPINGDIFFERENCE = 1
+# How much faster the player can turn around after moving
+TURNAROUNDQUICKNESS = 1.3
 # How much the player's running speed affects his jumping height
-HORIZONTALJUMPEFFECT = 5
+HORIZONTALJUMPEFFECT = 8
 # Collision types. Don't set one to zero, or the physics engine will crash, and therefore, the game.
 GROUNDCOLLISIONTYPE = 2
 GOALCOLLISIONTYPE = 3
@@ -76,4 +80,4 @@ BACKGROUNDAWESOMENESS = 200
 # Sizes of rope segments
 ROPESIZE = 5
 # This determines how "stiff" the rope feels
-ROPESTIFFNESS = 2
+ROPESTIFFNESS = 1

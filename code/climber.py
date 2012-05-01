@@ -3,10 +3,9 @@
 import pygame
 from objects import Object
 from constants import *
-from createshapes import *
+from createshapes import createBall
 from sys import exit
 from pymunk import Vec2d, SlideJoint
-#from util import imgload
 
 # The player-controlled thing
 # Pass it a world and position
@@ -24,7 +23,6 @@ class Climber(Object):
 		self.death = False
 		self.setupCollisionHandlers(world)
 		self.ropejoint = None
-		#self.image = imgload('roly.png')
 		world.addObject(self)
 		world.space.add(self.shape.body, self.shape)
 		return
@@ -51,6 +49,8 @@ class Climber(Object):
 					self.ropejoint = SlideJoint(self.shape.body, shape.body, (0, 0), (0, 0), PLAYERSIZE+2, PLAYERSIZE+5)
 					world.space.add(self.ropejoint)
 					break
+		if self.shape.body.position.y > HEIGHT:
+			self.dead = True
 		return
 	# Sets up the collision handlers
 	def setupCollisionHandlers(self, world):
@@ -82,20 +82,34 @@ class Climber(Object):
 		keys = pygame.key.get_pressed()
 		print self.canJump
 		vec = self.shape.body.velocity/10
-		if self.canJump:
+		if self.ropejoint != None:
 			if keys[RIGHTKEY]:
-				vec.x = PLAYERGROUNDSPEED
-				self.shape.body.angular_velocity += ROTSPEED
+				vec.x = PLAYERROPESPEED
+				self.shape.body.angular_velocity += ROTSPEED/3
 			if keys[LEFTKEY]:
-				vec.x = -PLAYERGROUNDSPEED
-				self.shape.body.angular_velocity -= ROTSPEED
+				vec.x = -PLAYERROPESPEED
+				self.shape.body.angular_velocity -= ROTSPEED/3
 		else:
-			if keys[RIGHTKEY]:
-				vec.x = PLAYERAIRSPEED
-				self.shape.body.angular_velocity += ROTSPEED
-			if keys[LEFTKEY]:
-				vec.x = -PLAYERAIRSPEED
-				self.shape.body.angular_velocity -= ROTSPEED
+			if self.canJump:
+				if keys[RIGHTKEY]:
+					if vec.x < 0:
+						vec.x += PLAYERGROUNDSPEED*TURNAROUNDQUICKNESS
+					else:
+						vec.x += PLAYERGROUNDSPEED
+					self.shape.body.angular_velocity += ROTSPEED
+				if keys[LEFTKEY]:
+					if vec.x > 0:
+						vec.x -= PLAYERGROUNDSPEED*TURNAROUNDQUICKNESS
+					else:
+						vec.x -= PLAYERGROUNDSPEED
+					self.shape.body.angular_velocity -= ROTSPEED
+			else:
+				if keys[RIGHTKEY]:
+					vec.x += PLAYERAIRSPEED
+					self.shape.body.angular_velocity += ROTSPEED/2
+				if keys[LEFTKEY]:
+					vec.x -= PLAYERAIRSPEED
+					self.shape.body.angular_velocity -= ROTSPEED/2
 		# Do other stuff
 		if keys[JUMPKEY]:
 			#print 'Read the up key'
@@ -145,9 +159,10 @@ class Climber(Object):
 		return
 	def Draw(self, world):
 		#print self.shape.body.angle
-		#newimg = pygame.transform.rotate(self.image, self.shape.body.angular_velocity)
-		#world.screen.blit(newimg, (self.shape.body.position-Vec2d(newimg.get_width()/2, newimg.get_height()/2).int_tuple))
-		pygame.draw.circle(world.screen, (0, 255, 0), self.shape.body.position.int_tuple, int(self.shape.radius))
-		pygame.draw.line(world.screen, (255, 0, 0), self.shape.body.position.int_tuple, (self.shape.body.position+self.shape.body.rotation_vector*self.shape.radius).int_tuple, 2)
+		newimg = pygame.transform.rotate(world.getImage('felix'), self.shape.body.angle*-180/3.14)
+		world.screen.blit(newimg, (self.shape.body.position-Vec2d(newimg.get_width()/2, newimg.get_height()/2).int_tuple))
+		#world.screen.blit(self.image, self.shape.body.position.int_tuple)
+		#pygame.draw.circle(world.screen, (0, 255, 0), self.shape.body.position.int_tuple, int(self.shape.radius))
+		#pygame.draw.line(world.screen, (255, 0, 0), self.shape.body.position.int_tuple, (self.shape.body.position+self.shape.body.rotation_vector*self.shape.radius).int_tuple, 2)
 		#pygame.draw.polygon(world.screen, (0, 255, 0), self.shape.get_points())
 		return

@@ -2,16 +2,18 @@
 
 import pygame
 from sys import exit
-import random
-import os
 from K2 import *
 import math
 import pymunk
-import pickle
 from vector import Vector
-from constants import *
-from createshapes import createPolygon
+from createshapes import *
 from pgu import gui
+import os
+from constants import *
+import pickle
+from objects import *
+from climber import *
+import random
 
 pygame.init()
 screen = pygame.display.set_mode((WIDTH+28, HEIGHT))
@@ -332,92 +334,96 @@ def setProperties(position):
 		exec('edit'+item[0]+'(editObject, index)')
 		return
 	return
-# Create all the menu images and things
-items = []
-polyimage = pygame.Surface((28, 28))
-polyimage.fill((0, 0, 0))
-pygame.draw.polygon(polyimage, (255, 255, 255), ((13, 0), (0, 28), (28, 28)), 3)
-climberimage = pygame.Surface((28, 28))
-climberimage.fill((0, 0, 0))
-pygame.draw.circle(climberimage, (0, 255, 0), (14, 14), 13)
-goalimage = pygame.Surface((28, 28))
-pygame.draw.rect(goalimage, (255, 255, 0), (0, 7, 28, 7))
-springimage = pygame.Surface((28, 28))
-pygame.draw.rect(springimage, (0, 255, 255), (0, 7, 28, 7))
-deathboximage = pygame.Surface((24, 24))
-deathboximage.fill((255, 0, 0))
-blockimage = pygame.Surface((28, 28))
-blockimage.fill((255, 255, 255))
-circleimage = pygame.Surface((28, 28))
-circleimage.fill((0, 0, 0))
-pygame.draw.circle(circleimage, (255, 255, 255), (14, 14), 13)
-textimage = pygame.Surface((28, 28))
-textimage.fill((0, 0, 0))
-font = pygame.font.Font(None, 25)
-textimage.blit(font.render('A', True, (255, 255, 255)), (2, 2))
-ropeimage = pygame.Surface((28, 28))
-ropeimage.fill((0, 0, 0))
-pygame.draw.line(ropeimage, (255, 170, 50), (14, 0), (14, 28), 1)
-items.extend([Item(polyimage, 'Poly'), Item(climberimage, 'Climber'), Item(goalimage, 'Goal'),
-	Item(springimage, 'Spring'), Item(deathboximage, 'DeathBox'), Item(blockimage, 'Block'),
-	Item(circleimage, 'Circle'), Item(textimage, 'Text'), Item(ropeimage, 'Rope')])
-menu = Menu(Vector(WIDTH, 0), items)
-# Run the level editor
-while True:
-	screen.blit(background, (0, 0))
-	pygame.draw.line(screen, (255, 255, 255), (WIDTH-1, 0), (WIDTH-1, HEIGHT), 1)
-	for e in pygame.event.get():
-		if e.type == pygame.QUIT:
-			pygame.quit()
-			exit()
-		elif e.type == pygame.KEYDOWN:
-			if e.key == pygame.K_ESCAPE:
+def main():
+	global leveldata
+	# Create all the menu images and things
+	items = []
+	polyimage = pygame.Surface((28, 28))
+	polyimage.fill((0, 0, 0))
+	pygame.draw.polygon(polyimage, (255, 255, 255), ((13, 0), (0, 28), (28, 28)), 3)
+	climberimage = pygame.Surface((28, 28))
+	climberimage.fill((0, 0, 0))
+	pygame.draw.circle(climberimage, (0, 255, 0), (14, 14), 13)
+	goalimage = pygame.Surface((28, 28))
+	pygame.draw.rect(goalimage, (255, 255, 0), (0, 7, 28, 7))
+	springimage = pygame.Surface((28, 28))
+	pygame.draw.rect(springimage, (0, 255, 255), (0, 7, 28, 7))
+	deathboximage = pygame.Surface((24, 24))
+	deathboximage.fill((255, 0, 0))
+	blockimage = pygame.Surface((28, 28))
+	blockimage.fill((255, 255, 255))
+	circleimage = pygame.Surface((28, 28))
+	circleimage.fill((0, 0, 0))
+	pygame.draw.circle(circleimage, (255, 255, 255), (14, 14), 13)
+	textimage = pygame.Surface((28, 28))
+	textimage.fill((0, 0, 0))
+	font = pygame.font.Font(None, 25)
+	textimage.blit(font.render('A', True, (255, 255, 255)), (2, 2))
+	ropeimage = pygame.Surface((28, 28))
+	ropeimage.fill((0, 0, 0))
+	pygame.draw.line(ropeimage, (255, 170, 50), (14, 0), (14, 28), 1)
+	items.extend([Item(polyimage, 'Poly'), Item(climberimage, 'Climber'), Item(goalimage, 'Goal'),
+		Item(springimage, 'Spring'), Item(deathboximage, 'DeathBox'), Item(blockimage, 'Block'),
+		Item(circleimage, 'Circle'), Item(textimage, 'Text'), Item(ropeimage, 'Rope')])
+	menu = Menu(Vector(WIDTH, 0), items)
+	# Run the level editor
+	while True:
+		screen.blit(background, (0, 0))
+		pygame.draw.line(screen, (255, 255, 255), (WIDTH-1, 0), (WIDTH-1, HEIGHT), 1)
+		for e in pygame.event.get():
+			if e.type == pygame.QUIT:
 				pygame.quit()
 				exit()
-			elif e.key == pygame.K_s:
-				try:
-					name = raw_input('Name of level? ')
-					name = os.path.join(LEVELFOLDER, name)
-					print name
-					filename = open(name, 'w')
-					pickle.dump(leveldata, filename)
-					filename.close()
-				except:
-					pass
-			elif e.key == pygame.K_c:
-				world.clear()
-				leveldata = []
-				objects = {}
-			elif e.key == pygame.K_SPACE:
-				world.clear()
-				loadLevel(world, leveldata)
-				while world.complete == False:
-					e = pygame.event.poll()
-					if e.type == pygame.QUIT:
-						pygame.quit()
-						exit()
-					elif e.type == pygame.KEYDOWN:
-						if e.key == pygame.K_ESCAPE:
+			elif e.type == pygame.KEYDOWN:
+				if e.key == pygame.K_ESCAPE:
+					pygame.quit()
+					exit()
+				elif e.key == pygame.K_s:
+					try:
+						name = raw_input('Name of level? ')
+						name = os.path.join(LEVELFOLDER, name)
+						print name
+						filename = open(name, 'w')
+						pickle.dump(leveldata, filename)
+						filename.close()
+					except:
+						pass
+				elif e.key == pygame.K_c:
+					world.clear()
+					leveldata = []
+					objects = {}
+				elif e.key == pygame.K_SPACE:
+					world.clear()
+					loadLevel(world, leveldata)
+					while world.complete == False:
+						e = pygame.event.poll()
+						if e.type == pygame.QUIT:
 							pygame.quit()
 							exit()
-						elif e.key == pygame.K_BACKSPACE:
-							break
-					screen.blit(background, (0, 0))
-					world.update()
-					clock.tick(FPS)
-					pygame.display.update()
-		elif e.type == pygame.MOUSEBUTTONDOWN:
-			if e.pos[0] < WIDTH:
-				if e.button == 1:
-					name = menu.returnSelected()
-					exec('define'+name+'()')
-				else:
-					setProperties(e.pos)
-	world.draw()
-	if world.complete == True:
-		world.clear()
-		loadLevel(world, leveldata)
-	menu.update()
-	drawHelpers()
-	clock.tick(FPS)
-	pygame.display.update()
+						elif e.type == pygame.KEYDOWN:
+							if e.key == pygame.K_ESCAPE:
+								pygame.quit()
+								exit()
+							elif e.key == pygame.K_BACKSPACE:
+								break
+						screen.blit(background, (0, 0))
+						world.update()
+						clock.tick(FPS)
+						pygame.display.update()
+			elif e.type == pygame.MOUSEBUTTONDOWN:
+				if e.pos[0] < WIDTH:
+					if e.button == 1:
+						name = menu.returnSelected()
+						exec('define'+name+'()')
+					else:
+						setProperties(e.pos)
+		world.draw()
+		if world.complete == True:
+			world.clear()
+			loadLevel(world, leveldata)
+		menu.update()
+		drawHelpers()
+		clock.tick(FPS)
+		pygame.display.update()
+if __name__ == '__main__':
+	main()

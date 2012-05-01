@@ -6,6 +6,7 @@ from sys import argv
 if len(argv) > 1:
 	if argv[1] == '-leveleditor':
 		from code import leveleditor
+		leveleditor.main()
 
 # Here we go!
 K2.main()

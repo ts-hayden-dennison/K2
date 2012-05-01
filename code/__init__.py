@@ -8,6 +8,6 @@ from constants import *
 from createshapes import *
 from vector import *
 from util import *
-from camera import *
+from leveleditor import *
 
 # And that's it folks!! :)
