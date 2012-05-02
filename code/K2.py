@@ -17,7 +17,9 @@ pygame.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.DOUBLEBUF)
 pygame.display.set_caption('K2')
 clock = pygame.time.Clock()
-background = imgload('./images/1.png')
+backgrounds = []
+for image in os.listdir(os.path.join(os.path.join(os.getcwd(), IMAGEFOLDER), '1')):
+	backgrounds.append(imgload(os.path.join(os.path.join(os.path.join(os.getcwd(), IMAGEFOLDER), '1'), image)))
 #background.fill(BACKGROUNDCOLOR)
 #background.convert()
 #for i in range(0, BACKGROUNDAWESOMENESS):
@@ -287,8 +289,10 @@ def main():
 						except:
 							return
 			###################################
-			screen.blit(background, (0, 0))
+			screen.blit(backgrounds[0], (0, 0))
 			world.update()
+			for background in backgrounds[1:]:
+				screen.blit(background, (0, 0))
 			clock.tick(FPS)
 			pygame.display.flip()
 		currentlevel += 1

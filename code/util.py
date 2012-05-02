@@ -49,13 +49,14 @@ def loadImages():
 	# Loads all images in the 'images' subfolder
 	images = {}
 	for image in os.listdir(os.path.join('.', IMAGEFOLDER)):
-		images[image[0:-4]] = imgload(os.path.join(IMAGEFOLDER, image))
+		if '.' in image:
+			images[image[0:-4]] = imgload(os.path.join(IMAGEFOLDER, image))
 	return images
 
 def imgload(filename, colorkey=(255, 255, 255)):
 	try:
 		image = pygame.image.load(filename)
 	except:
-		raise SystemError, "Could not load " + path
+		raise SystemError, "Could not load " + filename
 	image.set_colorkey(colorkey)
 	return image

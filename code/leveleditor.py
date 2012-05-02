@@ -1,7 +1,7 @@
 #! usr/bin/env python
 
 import pygame
-from sys import exit
+from sys import exit, argv
 from K2 import *
 import math
 import pymunk
@@ -21,16 +21,7 @@ clock = pygame.time.Clock()
 space = pymunk.Space
 world = World()
 CLIPPINGRADIUS = 5
-images = loadImages()
-for item in images:
-	if item in argv:
-		background = item
-		break
-try:
-	background = background
-except:
-	background = pygame.Surface((WIDTH+28, HEIGHT))
-	background.fill((0, 0, 0))
+background = imgload(argv[2])
 leveldata = []
 objects = {}
 class Menu():
@@ -279,10 +270,10 @@ def defineDeathBox():
 	return
 # Function for putting text into the world
 def defineText():
-	#pos = pygame.mouse.get_pos()
-	#text = textField('Enter text: ')
-	#world.addObject(Text(world, pos, text))
-	#leveldata.append(('Text', pos, text))
+	pos = pygame.mouse.get_pos()
+	text = raw_input('Enter text: ')
+	world.addObject(Text(world, pos, "'"+text+"'"))
+	leveldata.append(('Text', pos, "'"+text+"'"))
 	return
 # Draws the cursor lines
 def drawHelpers():

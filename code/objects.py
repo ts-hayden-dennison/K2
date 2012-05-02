@@ -80,7 +80,6 @@ class Rope(Object):
 	def Draw(self, world):
 		for shape in self.shapes:
 			pygame.draw.circle(world.screen, (255, 170, 50), shape.body.position.int_tuple, int(shape.radius))
-			pygame.draw.circle(world.screen, (0, 0, 0), shape.body.position.int_tuple, int(shape.radius), 4)
 		return
 	def setupLinks(self, world, position, length, mass, friction, elasticity):
 		global ROPESIZE
