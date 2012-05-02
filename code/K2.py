@@ -272,6 +272,8 @@ def main():
 		except:
 			if currentlevel >= len(levels):
 				return
+		world.draw()
+		pygame.display.update()
 		#################################################
 		while world.complete == False:
 			for e in pygame.event.get():

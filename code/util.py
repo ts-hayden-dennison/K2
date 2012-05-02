@@ -34,7 +34,6 @@ def loadLevel(world, data):
 		for i in command[1:]:
 			string = string+", "+i.__str__()
 		string = string+")"
-		print string
 		exec(string) 
 	return
 

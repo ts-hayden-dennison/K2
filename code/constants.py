@@ -14,7 +14,7 @@ GRAVITY = (0, 3000.0)
 DAMPING = 0.40
 # Divide by a larger value for more accuracy in the physics engine
 # divide by a smaller value for more speed
-ACCURACY = 1/200.0
+ACCURACY = 1/150.0
 # How many times the elasticity solver should resolve conflicts in a single frame
 ITERATIONS = 10
 # How far objects can penetrate
