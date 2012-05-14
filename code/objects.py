@@ -20,6 +20,36 @@ class Object(pygame.sprite.Sprite):
 	def Draw(self, world):
 		return
 
+# An NPC. What did you think?
+class NPC(Object):
+	def __init__(self, world, position):
+		pygame.sprite.Sprite.__init__(self)
+		self.shape = createBall(position, ENEMYSIZE, 20, 0.5, 0.5, False)
+		self.shape.collision_type = ROPECOLLISIONTYPE
+		world.addObject(self)
+		world.space.add(self.shape.body, self.shape)
+		self.direction = -1
+	def update(self, world):
+		self.shape.body.apply_impulse(Vec2d(ENEMYSPEED*self.direction, 0))
+		if abs(self.shape.body.velocity.x) > ENEMYSPEED*3:
+			self.shape.body.velocity.x = self.direction*ENEMYSPEED
+		bb = self.shape.cache_bb()
+		if self.direction == -1:
+			shapes = world.space.point_query((bb.left, bb.bottom))
+		else:
+			shapes = world.space.point_query((bb.right, bb.bottom))
+		if len(shapes) > 0:
+			self.direction *= -1
+		self.Draw(world)
+		return
+	def Draw(self, world):
+		newimg = pygame.transform.rotate(world.getImage('npc'), self.shape.body.angle*-180/3.14)
+		newimg.convert()
+		newimg.set_alpha(230)
+		position = world.camera.findPos(self.shape.body.position)
+		world.screen.blit(newimg, (position-Vec2d(newimg.get_width()/2, newimg.get_height()/2)))
+		return
+
 # A simple block that you can stand on. Does not have to be a square.
 # Pass it a world and position
 # Optional arguments: size(width, height) static, mass, friction, elasticity, collision type
@@ -79,7 +109,7 @@ class Rope(Object):
 		world.addObject(self)
 	def Draw(self, world):
 		for shape in self.shapes:
-			pygame.draw.circle(world.screen, (255, 170, 50), shape.body.position.int_tuple, int(shape.radius))
+			pygame.draw.circle(world.screen, (255, 170, 50), world.camera.findPos(shape.body.position), int(shape.radius))
 		return
 	def setupLinks(self, world, position, length, mass, friction, elasticity):
 		global ROPESIZE

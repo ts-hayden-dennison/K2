@@ -23,8 +23,10 @@ class Climber(Object):
 		self.death = False
 		self.setupCollisionHandlers(world)
 		self.ropejoint = None
+		self.screenPosition = Vec2d(WIDTH/2, HEIGHT/2)
 		world.addObject(self)
 		world.space.add(self.shape.body, self.shape)
+		world.camera.setup(self.shape.body.position)
 		return
 	def getDeath():
 		return self.death
@@ -89,13 +91,13 @@ class Climber(Object):
 		else:
 			if self.canJump:
 				if keys[RIGHTKEY]:
-					if vec.x < 0:
+					if self.shape.body.velocity.x <= 0:
 						vec.x += PLAYERGROUNDSPEED*TURNAROUNDQUICKNESS
 					else:
 						vec.x += PLAYERGROUNDSPEED
 					self.shape.body.angular_velocity += ROTSPEED
 				if keys[LEFTKEY]:
-					if vec.x > 0:
+					if self.shape.body.velocity.x >= 0:
 						vec.x -= PLAYERGROUNDSPEED*TURNAROUNDQUICKNESS
 					else:
 						vec.x -= PLAYERGROUNDSPEED
@@ -125,12 +127,30 @@ class Climber(Object):
 			if self.ropejoint != None:
 				self.removeJoints(world)
 				vec *= 3
+		if keys[DOWNKEY]:
+			self.removeJoints(world)
 		self.shape.body.apply_impulse(vec)
 		self.checkVelocities()
 		if keys[ACTIONKEY]:
 			if self.actionTimer == 0:
 				self.performAction(world)
 				self.actionTimer = ACTIONLENGTH
+		self.updateCamera(world)
+		return
+	def updateCamera(self, world):
+		if self.shape.body.position.x > CAMERAX:
+			if self.screenPosition.x < CAMERAX:
+				world.camera.move((self.screenPosition.x-CAMERAX, 0))
+		if self.shape.body.position.x < world.camera.backgrounds[0].get_height()-CAMERAX:
+			if self.screenPosition.x > WIDTH-CAMERAX:
+				world.camera.move((self.screenPosition.x-(WIDTH-CAMERAX), 0))
+		if self.shape.body.position.y > CAMERAY:
+			if self.screenPosition.y < CAMERAY:
+				world.camera.move((0, self.screenPosition.y-CAMERAY))
+		if self.shape.body.position.y < world.camera.backgrounds[0].get_height()-CAMERAY:
+			if self.screenPosition.y > HEIGHT-CAMERAY:
+				world.camera.move((0, self.screenPosition.y-(HEIGHT-CAMERAY)))
+		return
 	def performAction(self, world):
 		self.removeJoints(world)
 		return
@@ -159,7 +179,9 @@ class Climber(Object):
 		newimg = pygame.transform.rotate(world.getImage('felix'), self.shape.body.angle*-180/3.14)
 		newimg.convert()
 		newimg.set_alpha(230)
-		world.screen.blit(newimg, (self.shape.body.position-Vec2d(newimg.get_width()/2, newimg.get_height()/2).int_tuple))
+		position = world.camera.findPos(self.shape.body.position)
+		self.screenPosition = Vec2d(position)
+		world.screen.blit(newimg, (position-Vec2d(newimg.get_width()/2, newimg.get_height()/2)))
 		#world.screen.blit(self.image, self.shape.body.position.int_tuple)
 		#pygame.draw.circle(world.screen, (0, 255, 0), self.shape.body.position.int_tuple, int(self.shape.radius))
 		#pygame.draw.line(world.screen, (255, 0, 0), self.shape.body.position.int_tuple, (self.shape.body.position+self.shape.body.rotation_vector*self.shape.radius).int_tuple, 2)

@@ -3,15 +3,15 @@
 import pygame
 
 # The frames per second the game will *try* to run at
-FPS = 100
+FPS = 50000
 # Width of application window
-WIDTH = 1024
+WIDTH = 50000
 # Height of application window
-HEIGHT = 640
+HEIGHT = 30
 # Force of gravity in the physics simulation
 GRAVITY = (0, 3000.0)
 # Basically air humidity
-DAMPING = 0.40
+DAMPING = 0.20
 # Divide by a larger value for more accuracy in the physics engine
 # divide by a smaller value for more speed
 ACCURACY = 1/150.0
@@ -27,7 +27,7 @@ PLAYERGROUNDSPEED = 260
 PLAYERROPESPEED = 400
 # Airspeed of the player
 PLAYERAIRSPEED = 100
-# Initial jump velocity
+# Initial jump velocity						
 PLAYERJUMPHEIGHT = 4000
 # How heavy the player is
 PLAYERMASS = 30
@@ -59,7 +59,7 @@ MAXROTSPEED = 90
 # the player cannot jump off a side of a polygon.
 JUMPINGDIFFERENCE = 1
 # How much faster the player can turn around after moving
-TURNAROUNDQUICKNESS = 1.3
+TURNAROUNDQUICKNESS = 3
 # How much the player's running speed affects his jumping height
 HORIZONTALJUMPEFFECT = 8
 # Collision types. Don't set one to zero, or the physics engine will crash, and therefore, the game.
@@ -81,3 +81,10 @@ BACKGROUNDAWESOMENESS = 200
 ROPESIZE = 5
 # This determines how "stiff" the rope feels
 ROPESTIFFNESS = 1
+# This determines how large enemies are
+ENEMYSIZE = 14
+# This determines how fast enemies are.
+ENEMYSPEED = 70
+#
+CAMERAX = 10
+CAMERAY = 10

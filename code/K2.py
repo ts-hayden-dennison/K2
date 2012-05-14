@@ -11,25 +11,14 @@ from objects import *
 from constants import *
 from climber import *
 from util import *
+from camera import *
+
 ###############################################################################
 # INITIALIZATION
 pygame.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.DOUBLEBUF)
 pygame.display.set_caption('K2')
 clock = pygame.time.Clock()
-backgrounds = []
-for image in os.listdir(os.path.join(os.path.join(os.getcwd(), IMAGEFOLDER), '1')):
-	backgrounds.append(imgload(os.path.join(os.path.join(os.path.join(os.getcwd(), IMAGEFOLDER), '1'), image)))
-#background.fill(BACKGROUNDCOLOR)
-#background.convert()
-#for i in range(0, BACKGROUNDAWESOMENESS):
-#	choice = random.choice(('rect', 'circle', 'line'))
-#	if choice == 'rect':
-#		pygame.draw.rect(background, randomColor(), randomRect())
-#	elif choice == 'circle':
-#		pygame.draw.circle(background, randomColor(), randomPos(), random.randint(5, 200))
-#	elif choice == 'line':
-#		pygame.draw.line(background, randomColor(), randomPos(), randomPos(), random.randint(1, 10))
 levels = loadLevels()
 currentlevel = 0
 if '-nosounds' in argv:
@@ -191,7 +180,11 @@ class World():
 		self.complete = False
 		self.nextIdentification = 0
 		self.callbacks = {}
+		self.camera = Camera()
 		return
+	def _get_backgrounds(self):
+		global backgrounds
+		return backgrounds
 
 ###############################################################################
 # LOCAL FUNCTION DEFINITIONS
@@ -291,10 +284,10 @@ def main():
 						except:
 							return
 			###################################
-			screen.blit(backgrounds[0], (0, 0))
+			screen.blit(world.camera.backgrounds[0], world.camera.findPos((0, 0)))
 			world.update()
-			for background in backgrounds[1:]:
-				screen.blit(background, (0, 0))
+			for background in world.camera.backgrounds[1:]:
+				screen.blit(background, world.camera.findPos((0, 0)))
 			clock.tick(FPS)
 			pygame.display.flip()
 		currentlevel += 1

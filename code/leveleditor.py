@@ -268,6 +268,13 @@ def defineDeathBox():
 		clock.tick(FPS)
 		pygame.display.update()
 	return
+def defineNPC():
+	pos = pygame.mouse.get_pos()
+	enemy = Enemy(world, pos)
+	world.addObject(enemy)
+	index = len(leveldata)
+	leveldata.append(['NPC', pos])
+	objects[enemy] = index
 # Function for putting text into the world
 def defineText():
 	pos = pygame.mouse.get_pos()
@@ -361,9 +368,11 @@ def main():
 	ropeimage = pygame.Surface((28, 28))
 	ropeimage.fill((0, 0, 0))
 	pygame.draw.line(ropeimage, (255, 170, 50), (14, 0), (14, 28), 1)
+	enemyimage = pygame.Surface((28, 28))
+	pygame.draw.circle(enemyimage, (200, 200, 200), (14, 14), 14)
 	items.extend([Item(polyimage, 'Poly'), Item(climberimage, 'Climber'), Item(goalimage, 'Goal'),
 		Item(springimage, 'Spring'), Item(deathboximage, 'DeathBox'), Item(blockimage, 'Block'),
-		Item(circleimage, 'Circle'), Item(textimage, 'Text'), Item(ropeimage, 'Rope')])
+		Item(circleimage, 'Circle'), Item(textimage, 'Text'), Item(ropeimage, 'Rope'), Item(enemyimage, 'NPC')])
 	menu = Menu(Vector(WIDTH, 0), items)
 	# Run the level editor
 	while True:
