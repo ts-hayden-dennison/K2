@@ -3,7 +3,7 @@
 import pygame
 from objects import Object
 from constants import *
-from createshapes import createBall
+from createshapes import createBall, createBox
 from sys import exit
 from pymunk import Vec2d, SlideJoint
 
@@ -20,13 +20,16 @@ class Climber(Object):
 		self.actionTimer = ACTIONLENGTH
 		self.shape = createBall(position, PLAYERSIZE, PLAYERMASS, PLAYERFRICTION, PLAYERBOUNCE)
 		self.shape.collision_type = collision
+		self.head = createBox(position, PLAYERHEADSIZE, 3, 0.0, 0.0)
 		self.death = False
 		self.setupCollisionHandlers(world)
 		self.ropejoint = None
 		self.screenPosition = Vec2d(WIDTH/2, HEIGHT/2)
+		self.headjoint = SlideJoint(self.shape.body, self.head.body, (0, 0), (0, 0), 0, 20)
 		world.addObject(self)
 		world.space.add(self.shape.body, self.shape)
-		world.camera.setup(self.shape.body.position)
+		world.space.add(self.head.body, self.head)
+		world.space.add(self.headjoint)
 		return
 	def getDeath():
 		return self.death
@@ -130,6 +133,8 @@ class Climber(Object):
 		if keys[DOWNKEY]:
 			self.removeJoints(world)
 		self.shape.body.apply_impulse(vec)
+		self.head.body.apply_impulse(vec/10)
+		self.head.body.apply_impulse(Vec2d(0, -100))
 		self.checkVelocities()
 		if keys[ACTIONKEY]:
 			if self.actionTimer == 0:
@@ -176,14 +181,17 @@ class Climber(Object):
 		return
 	def Draw(self, world):
 		#print self.shape.body.angle
-		newimg = pygame.transform.rotate(world.getImage('felix'), self.shape.body.angle*-180/3.14)
-		newimg.convert()
-		newimg.set_alpha(230)
+		#newimg = pygame.transform.rotate(world.getImage('felix'), self.shape.body.angle*-180/3.14)
+		#newimg.convert()
+		#newimg.set_alpha(230)
 		position = world.camera.findPos(self.shape.body.position)
 		self.screenPosition = Vec2d(position)
-		world.screen.blit(newimg, (position-Vec2d(newimg.get_width()/2, newimg.get_height()/2)))
+		#world.screen.blit(newimg, (position-Vec2d(newimg.get_width()/2, newimg.get_height()/2)))
 		#world.screen.blit(self.image, self.shape.body.position.int_tuple)
-		#pygame.draw.circle(world.screen, (0, 255, 0), self.shape.body.position.int_tuple, int(self.shape.radius))
-		#pygame.draw.line(world.screen, (255, 0, 0), self.shape.body.position.int_tuple, (self.shape.body.position+self.shape.body.rotation_vector*self.shape.radius).int_tuple, 2)
-		#pygame.draw.polygon(world.screen, (0, 255, 0), self.shape.get_points())
+		pygame.draw.circle(world.screen, (0, 255, 0), position, int(self.shape.radius))
+		pygame.draw.line(world.screen, (255, 0, 0), position, (position+self.shape.body.rotation_vector*self.shape.radius).int_tuple, 2)
+		points = self.head.get_points()
+		for point in points:
+			points[points.index(point)] = world.camera.findPos(point)
+		pygame.draw.polygon(world.screen, (0, 255, 0), points)
 		return

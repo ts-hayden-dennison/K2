@@ -3,11 +3,11 @@
 import pygame
 
 # The frames per second the game will *try* to run at
-FPS = 50000
+FPS = 60
 # Width of application window
-WIDTH = 50000
+WIDTH = 640
 # Height of application window
-HEIGHT = 30
+HEIGHT = 480
 # Force of gravity in the physics simulation
 GRAVITY = (0, 3000.0)
 # Basically air humidity
@@ -19,7 +19,9 @@ ACCURACY = 1/150.0
 ITERATIONS = 10
 # How far objects can penetrate
 BIAS = 0.0
-# Width and height of player box
+# Size of player head
+PLAYERHEADSIZE = (25, 25)
+# Radius of player wheel
 PLAYERSIZE = 13
 # Walking speed of the player
 PLAYERGROUNDSPEED = 260
@@ -86,5 +88,5 @@ ENEMYSIZE = 14
 # This determines how fast enemies are.
 ENEMYSPEED = 70
 #
-CAMERAX = 10
-CAMERAY = 10
+CAMERAX = 300
+CAMERAY = 220
