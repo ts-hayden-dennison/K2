@@ -5,9 +5,9 @@ from sys import exit, argv
 from K2 import *
 import math
 import pymunk
+from pymunk import Vec2d
 from vector import Vector
 from createshapes import *
-from pgu import gui
 import os
 from constants import *
 import pickle
@@ -21,9 +21,13 @@ clock = pygame.time.Clock()
 space = pymunk.Space
 world = World()
 CLIPPINGRADIUS = 5
-background = imgload(argv[2])
+try:
+	background = imgload(argv[2])
+except:
+	background = pygame.Surface((640, 480))
 leveldata = []
 objects = {}
+lastCameraPos = Vec2d()
 class Menu():
 	def __init__(self, position, items=[]):
 		self.items = items
@@ -69,10 +73,9 @@ def setProperties(classname):
 # Create polygons, convex or concave (the concave polygon is triangulated)
 def definePoly():
 	global CLIPPINGRADIUS, clock, world, leveldata
-	pos = pygame.mouse.get_pos()
-	center = pos[:]
-	points = [pos[:]]
-	polypoints = [(0, 0)]
+	center = lastCameraPos+Vec2d(pygame.mouse.get_pos())
+	points = [Vec2d(center.x, center.y)]
+	polypoints = [Vec2d(0, 0)]
 	while True:
 		e = pygame.event.poll()
 		if e.type == pygame.QUIT:
@@ -87,35 +90,37 @@ def definePoly():
 		elif e.type == pygame.MOUSEBUTTONDOWN:
 			if len(points) >= 3:
 				for point in points:
-					if findDistance(e.pos, point) < CLIPPINGRADIUS:
+					if findDistance(lastCameraPos+e.pos, point) < CLIPPINGRADIUS:
 						if pymunk.util.is_convex(points):
+							for vert in polypoints:
+									polypoints[polypoints.index(vert)] = vert.int_tuple
 							poly = Poly(world, center, polypoints)
-							world.addObject(poly)
 							index = len(leveldata)
 							leveldata.append(('Poly', center, polypoints))
 							objects[poly] = index
 							return
 						else:
 							triangles = pymunk.util.triangulate(polypoints)
-							for pointslist in triangles:
-								poly = Poly(world, center, pointslist)
-								world.addObject(poly)
+							polys = pymunk.util.convexise(triangles)
+							for pointslist in polys:
+								for vert in pointslist:
+									pointslist[pointslist.index(vert)] = vert.int_tuple
+								poly = Poly(world, center.int_tuple, pointslist)
 								index = len(leveldata)
-								leveldata.append(('Poly', center, pointslist))
+								leveldata.append(('Poly', center.int_tuple, pointslist))
 								objects[poly] = index
 							return
-			polypoint = (Vector(e.pos[0], e.pos[1])-Vector(center[0], center[1])).int_tuple()
-			polypoints.append(polypoint)
-			points.append(e.pos)
+			polypoints.append((Vec2d(e.pos)-(center))+lastCameraPos)
+			points.append(lastCameraPos+Vec2d(e.pos))
 		screen.blit(background, (0, 0))
 		world.draw()
 		for point in points:
-			pygame.draw.circle(screen, (255, 255, 0), point, CLIPPINGRADIUS)
+			pygame.draw.circle(screen, (255, 255, 0), world.camera.findPos(point).int_tuple, CLIPPINGRADIUS)
 			if points.index(point) > 0:
-				pygame.draw.line(screen, (255, 255, 255), point, points[points.index(point)-1], 3)
+				pygame.draw.line(screen, (255, 255, 255), world.camera.findPos(point).int_tuple, world.camera.findPos(points[points.index(point)-1]).int_tuple, 3)
 		if len(points) > 0:
-			pygame.draw.line(screen, (255, 255, 255), points[-1], pygame.mouse.get_pos(), 3)
-		pygame.draw.circle(screen, (255, 0, 0), center, 3)
+			pygame.draw.line(screen, (255, 255, 255), world.camera.findPos(points[-1]).int_tuple, pygame.mouse.get_pos(), 3)
+		pygame.draw.circle(screen, (255, 0, 0), world.camera.findPos(center).int_tuple, 3)
 		drawHelpers()
 		clock.tick(FPS)
 		pygame.display.update()
@@ -124,30 +129,11 @@ def editPoly(data):
 	print data
 	return
 def editClimber(climber, index):
-	last = climber.shape.body.position
-	while True:
-		e = pygame.event.poll()
-		if e.type == pygame.QUIT:
-			pygame.quit()
-			exit()
-		elif e.type == pygame.KEYDOWN:
-			if e.key == pygame.K_ESCAPE:
-				pygame.quit()
-				exit()
-			elif e.key == pygame.K_BACKSPACE:
-				return
-		elif e.type == pygame.MOUSEBUTTONUP:
-			leveldata[index][1] = last.int_tuple
-			world.update()
-			return
-		elif e.type == pygame.MOUSEMOTION:
-			last += e.pos-last
-		climber.shape.body.position = last
-		screen.blit(background,(0, 0))
-		world.draw()
-		drawHelpers()
-		clock.tick(FPS)
-		pygame.display.update()
+	global world
+	leveldata.pop(index)
+	print world.getObjects()
+	world.removeObject(climber)
+	print world.getObjects()
 	return
 # Create circles
 def defineCircle():
@@ -167,7 +153,6 @@ def defineCircle():
 				return
 		elif e.type == pygame.MOUSEBUTTONDOWN:
 			circle = Circle(world, center.int_tuple(), radius)
-			world.addObject(circle)
 			index = len(leveldata)
 			leveldata.append(('Circle',  center.int_tuple(), radius))
 			objects[circle] = index
@@ -184,23 +169,21 @@ def defineCircle():
 def defineGoal():
 	global leveldata, world
 	pos = pygame.mouse.get_pos()
-	world.addObject(Goal(world, pos))
+	Goal(world, pos)
 	leveldata.append(['Goal', pos])
 # Drop climbers
 def defineClimber():
 	global leveldata, world
-	pos = pygame.mouse.get_pos()
-	climber = Climber(world, pos)
-	world.addObject(climber)
+	pos = lastCameraPos+pygame.mouse.get_pos()
+	climber = Climber(world, pos.int_tuple)
 	index = len(leveldata)
-	leveldata.append(['Climber', pos])
+	leveldata.append(['Climber', pos.int_tuple])
 	objects[climber] = index
 # Convienience function for creating springs
 def defineSpring():
 	global leveldata, world
 	pos = pygame.mouse.get_pos()
 	spring = Spring(world, pos)
-	world.addObject(spring)
 	index = len(leveldata)
 	leveldata.append(['Spring', pos])
 	objects[spring] = index
@@ -224,7 +207,6 @@ def defineBlock():
 				return
 		elif e.type == pygame.MOUSEBUTTONDOWN:
 			block = Block(world, (startpos[0]+width/2, startpos[1]+height/2), (width, height))
-			world.addObject(block)
 			index = len(leveldata)
 			leveldata.append(['Block', (startpos[0]+width/2, startpos[1]+height/2), (width, height)])
 			objects[block] = index
@@ -270,8 +252,7 @@ def defineDeathBox():
 	return
 def defineNPC():
 	pos = pygame.mouse.get_pos()
-	enemy = Enemy(world, pos)
-	world.addObject(enemy)
+	enemy = NPC(world, pos)
 	index = len(leveldata)
 	leveldata.append(['NPC', pos])
 	objects[enemy] = index
@@ -279,14 +260,27 @@ def defineNPC():
 def defineText():
 	pos = pygame.mouse.get_pos()
 	text = raw_input('Enter text: ')
-	world.addObject(Text(world, pos, "'"+text+"'"))
+	Text(world, pos, "'"+text+"'")
 	leveldata.append(('Text', pos, "'"+text+"'"))
 	return
 # Draws the cursor lines
 def drawHelpers():
+	global lastCameraPos
 	pos = pygame.mouse.get_pos()
 	pygame.draw.line(screen, (255, 0, 0), (pos[0], 0), (pos[0], HEIGHT), 1)
 	pygame.draw.line(screen, (255, 0, 0), (0, pos[1]), (screen.get_width(), pos[1]), 1)
+	keys = pygame.key.get_pressed()
+	vec = Vec2d()
+	if keys[pygame.K_w]:
+		vec.y = -10
+	if keys[pygame.K_s]:
+		vec.y = 10
+	if keys[pygame.K_d]:
+		vec.x = 10
+	if keys[pygame.K_a]:
+		vec.x = -10
+	world.camera.move(vec)
+	lastCameraPos += vec
 	return
 # Function for defining ropes
 def defineRope():
@@ -305,7 +299,6 @@ def defineRope():
 		elif e.type == pygame.MOUSEBUTTONDOWN:
 			length = abs(e.pos[1]-position[1])
 			rope = Rope(world, position, length)
-			world.addObject(rope)
 			index = len(leveldata)
 			leveldata.append(('Rope', position, length))
 			objects[rope] = index
@@ -320,7 +313,7 @@ def defineRope():
 	return
 
 def setProperties(position):
-	shapes = world.space.point_query(position)
+	shapes = world.space.point_query(lastCameraPos+position)
 	index = -1
 	editObject = None
 	for shape in shapes:
@@ -336,8 +329,8 @@ def setProperties(position):
 					editObject = ob
 					break
 	if index != -1:
-		item = leveldata[index]
-		exec('edit'+item[0]+'(editObject, index)')
+		leveldata.pop(index)
+		world.removeObject(editObject)
 		return
 	return
 def main():
@@ -386,7 +379,7 @@ def main():
 				if e.key == pygame.K_ESCAPE:
 					pygame.quit()
 					exit()
-				elif e.key == pygame.K_s:
+				elif e.key == pygame.K_RETURN:
 					try:
 						name = raw_input('Name of level? ')
 						name = os.path.join(LEVELFOLDER, name)
@@ -401,7 +394,8 @@ def main():
 					leveldata = []
 					objects = {}
 				elif e.key == pygame.K_SPACE:
-					world.clear()
+					newworld = World()
+					loadLevel(newworld, leveldata)
 					loadLevel(world, leveldata)
 					while world.complete == False:
 						e = pygame.event.poll()
@@ -415,9 +409,10 @@ def main():
 							elif e.key == pygame.K_BACKSPACE:
 								break
 						screen.blit(background, (0, 0))
-						world.update()
+						newworld.update()
 						clock.tick(FPS)
 						pygame.display.update()
+					del newworld
 			elif e.type == pygame.MOUSEBUTTONDOWN:
 				if e.pos[0] < WIDTH:
 					if e.button == 1:

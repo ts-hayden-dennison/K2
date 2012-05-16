@@ -16,7 +16,7 @@ class Camera():
 		return
 	def findPos(self, point):
 		diff = point-self.moved
-		return diff.int_tuple
+		return diff
 	def move(self, delta):
 		self.moved += delta
 		return

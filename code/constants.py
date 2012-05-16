@@ -87,6 +87,8 @@ ROPESTIFFNESS = 1
 ENEMYSIZE = 14
 # This determines how fast enemies are.
 ENEMYSPEED = 70
-#
+# How close the player can be next to the sides of the screen without the camera moving 
 CAMERAX = 300
 CAMERAY = 220
+# How much 'floatiness' the player's head has
+PLAYERHEADFLOAT = -200

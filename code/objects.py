@@ -83,7 +83,13 @@ class Poly(Object):
 		else:
 			world.space.add(self.shape.body, self.shape)
 		return
-
+	def Draw(self, world):
+		points = self.shape.get_points()
+		for p in points:
+			points[points.index(p)] = world.camera.findPos(p)
+		pygame.draw.polygon(world.screen, (255, 255, 255), points)
+		pygame.draw.polygon(world.screen, (255, 0, 0), points, 2)
+		return
 # A circle
 # Pass it a world, position, and radius
 # Optional arguments: mass, friction, elasticity, collision type

@@ -5,7 +5,7 @@ from objects import Object
 from constants import *
 from createshapes import createBall, createBox
 from sys import exit
-from pymunk import Vec2d, SlideJoint
+from pymunk import Vec2d, SlideJoint, DampedSpring
 
 # The player-controlled thing
 # Pass it a world and position
@@ -20,12 +20,12 @@ class Climber(Object):
 		self.actionTimer = ACTIONLENGTH
 		self.shape = createBall(position, PLAYERSIZE, PLAYERMASS, PLAYERFRICTION, PLAYERBOUNCE)
 		self.shape.collision_type = collision
-		self.head = createBox(position, PLAYERHEADSIZE, 3, 0.0, 0.0)
+		self.head = createBox(position-Vec2d(0, PLAYERHEADSIZE[1]), PLAYERHEADSIZE, 1, 0.3, 0.3)
 		self.death = False
 		self.setupCollisionHandlers(world)
 		self.ropejoint = None
 		self.screenPosition = Vec2d(WIDTH/2, HEIGHT/2)
-		self.headjoint = SlideJoint(self.shape.body, self.head.body, (0, 0), (0, 0), 0, 20)
+		self.headjoint = SlideJoint(self.shape.body, self.head.body, (0, 0), (0, PLAYERHEADSIZE[1]), 0, 0)
 		world.addObject(self)
 		world.space.add(self.shape.body, self.shape)
 		world.space.add(self.head.body, self.head)
@@ -45,15 +45,15 @@ class Climber(Object):
 			self.canJump = False
 		for shape in shapes:
 			if shape.collision_type == ROPECOLLISIONTYPE:
-				if self.ropejoint == None:
+				'''if self.ropejoint == None:
 					self.ropejoint = SlideJoint(self.shape.body, shape.body, (0, 0), (0, 0), PLAYERSIZE+2, PLAYERSIZE+5)
 					world.space.add(self.ropejoint)
 					break
-				else:
-					self.removeJoints(world)
-					self.ropejoint = SlideJoint(self.shape.body, shape.body, (0, 0), (0, 0), PLAYERSIZE+2, PLAYERSIZE+5)
-					world.space.add(self.ropejoint)
-					break
+				else:'''
+				self.removeJoints(world)
+				self.ropejoint = SlideJoint(self.shape.body, shape.body, (0, 0), (0, 0), PLAYERSIZE+2, PLAYERSIZE+5)
+				world.space.add(self.ropejoint)
+				break
 		if self.shape.body.position.y > HEIGHT:
 			self.dead = True
 		return
@@ -133,8 +133,7 @@ class Climber(Object):
 		if keys[DOWNKEY]:
 			self.removeJoints(world)
 		self.shape.body.apply_impulse(vec)
-		self.head.body.apply_impulse(vec/10)
-		self.head.body.apply_impulse(Vec2d(0, -100))
+		self.head.body.apply_impulse(Vec2d(0, PLAYERHEADFLOAT))
 		self.checkVelocities()
 		if keys[ACTIONKEY]:
 			if self.actionTimer == 0:
@@ -181,17 +180,18 @@ class Climber(Object):
 		return
 	def Draw(self, world):
 		#print self.shape.body.angle
-		#newimg = pygame.transform.rotate(world.getImage('felix'), self.shape.body.angle*-180/3.14)
-		#newimg.convert()
-		#newimg.set_alpha(230)
-		position = world.camera.findPos(self.shape.body.position)
-		self.screenPosition = Vec2d(position)
-		#world.screen.blit(newimg, (position-Vec2d(newimg.get_width()/2, newimg.get_height()/2)))
+		wheel = pygame.transform.rotate(world.getImage('wheel'), self.shape.body.angle*-180/3.14)
+		wheelposition = world.camera.findPos(self.shape.body.position)
+		self.screenPosition = Vec2d(wheelposition)
+		world.screen.blit(wheel, (wheelposition-Vec2d(wheel.get_width()/2, wheel.get_height()/2)))
+		head = pygame.transform.rotate(world.getImage('head'), self.head.body.angle*-180/3.14)
+		headposition = world.camera.findPos(self.head.body.position)
+		world.screen.blit(head, (headposition-Vec2d(head.get_width()/2, head.get_height()/2)))
 		#world.screen.blit(self.image, self.shape.body.position.int_tuple)
-		pygame.draw.circle(world.screen, (0, 255, 0), position, int(self.shape.radius))
-		pygame.draw.line(world.screen, (255, 0, 0), position, (position+self.shape.body.rotation_vector*self.shape.radius).int_tuple, 2)
-		points = self.head.get_points()
-		for point in points:
-			points[points.index(point)] = world.camera.findPos(point)
-		pygame.draw.polygon(world.screen, (0, 255, 0), points)
+		#pygame.draw.circle(world.screen, (0, 255, 0), position, int(self.shape.radius))
+		#pygame.draw.line(world.screen, (255, 0, 0), position, (position+self.shape.body.rotation_vector*self.shape.radius).int_tuple, 2)
+		#points = self.head.get_points()
+		#for point in points:
+		#	points[points.index(point)] = world.camera.findPos(point)
+		#pygame.draw.polygon(world.screen, (0, 255, 0), points)
 		return
