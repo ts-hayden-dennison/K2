@@ -6,12 +6,13 @@ from constants import *
 from createshapes import createBall, createBox
 from sys import exit
 from pymunk import Vec2d, SlideJoint, DampedSpring
+import random
 
 # The player-controlled thing
 # Pass it a world and position
 # Optional arguments: collision type, size
 class Climber(Object):
-	def __init__(self, world, position, collision=PLAYERCOLLISIONTYPE, size=PLAYERSIZE):
+	def __init__(self, world, position):
 		global PLAYERMASS, PLAYERFRICTION, PLAYERBOUNCE, PLAYERCOLLISIONTYPE, ACTIONLENGTH, GROUNDCOLLISIONTYPE
 		pygame.sprite.Sprite.__init__(self)
 		self.canJump = False
@@ -19,13 +20,13 @@ class Climber(Object):
 		self.jumpLengthen = 1
 		self.actionTimer = ACTIONLENGTH
 		self.shape = createBall(position, PLAYERSIZE, PLAYERMASS, PLAYERFRICTION, PLAYERBOUNCE)
-		self.shape.collision_type = collision
+		self.shape.collision_type = PLAYERCOLLISIONTYPE
 		self.head = createBox(position-Vec2d(0, PLAYERHEADSIZE[1]), PLAYERHEADSIZE, 1, 0.3, 0.3)
 		self.death = False
 		self.setupCollisionHandlers(world)
 		self.ropejoint = None
-		self.screenPosition = Vec2d(WIDTH/2, HEIGHT/2)
-		self.headjoint = SlideJoint(self.shape.body, self.head.body, (0, 0), (0, PLAYERHEADSIZE[1]), 0, 0)
+		self.screenPosition = world.camera.findPos(position)
+		self.headjoint = SlideJoint(self.shape.body, self.head.body, (0, 0), (0, PLAYERHEADSIZE[1]/2), 0, 2)
 		world.addObject(self)
 		world.space.add(self.shape.body, self.shape)
 		world.space.add(self.head.body, self.head)
@@ -179,19 +180,17 @@ class Climber(Object):
 			self.shape.body.angular_velocity = -MAXROTSPEED
 		return
 	def Draw(self, world):
-		#print self.shape.body.angle
-		wheel = pygame.transform.rotate(world.getImage('wheel'), self.shape.body.angle*-180/3.14)
-		wheelposition = world.camera.findPos(self.shape.body.position)
-		self.screenPosition = Vec2d(wheelposition)
-		world.screen.blit(wheel, (wheelposition-Vec2d(wheel.get_width()/2, wheel.get_height()/2)))
-		head = pygame.transform.rotate(world.getImage('head'), self.head.body.angle*-180/3.14)
+		#wheel = pygame.transform.rotate(world.getImage('wheel'), self.shape.body.angle*-180/3.14)
+		#wheelposition = world.camera.findPos(self.shape.body.position)
+		self.screenPosition = world.camera.findPos(self.shape.body.position)
+		#world.screen.blit(wheel, (wheelposition-Vec2d(wheel.get_width()/2, wheel.get_height()/2)))
+		#head = pygame.transform.rotate(world.getImage('head'), self.head.body.angle*-180/3.14)
 		headposition = world.camera.findPos(self.head.body.position)
-		world.screen.blit(head, (headposition-Vec2d(head.get_width()/2, head.get_height()/2)))
-		#world.screen.blit(self.image, self.shape.body.position.int_tuple)
-		#pygame.draw.circle(world.screen, (0, 255, 0), position, int(self.shape.radius))
-		#pygame.draw.line(world.screen, (255, 0, 0), position, (position+self.shape.body.rotation_vector*self.shape.radius).int_tuple, 2)
-		#points = self.head.get_points()
-		#for point in points:
-		#	points[points.index(point)] = world.camera.findPos(point)
-		#pygame.draw.polygon(world.screen, (0, 255, 0), points)
+		#world.screen.blit(head, (headposition-Vec2d(head.get_width()/2, head.get_height()/2)))
+		pygame.draw.circle(world.screen, (0, 255, 0), self.screenPosition.int_tuple, int(self.shape.radius), random.choice((2, 3, 4, 0)))
+		pygame.draw.line(world.screen, (255, 0, 0), self.screenPosition.int_tuple, (self.screenPosition+self.shape.body.rotation_vector*self.shape.radius).int_tuple, 3)
+		points = self.head.get_points()
+		for point in points:
+			points[points.index(point)] = world.camera.findPos(point)
+		pygame.draw.polygon(world.screen, (0, 255, 0), points, random.choice((2, 3, 4, 0)))
 		return

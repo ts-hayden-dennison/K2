@@ -25,8 +25,6 @@ try:
 	background = imgload(argv[2])
 except:
 	background = pygame.Surface((640, 480))
-leveldata = []
-objects = {}
 lastCameraPos = Vec2d()
 class Menu():
 	def __init__(self, position, items=[]):
@@ -66,13 +64,10 @@ def findDistance(p1, p2):
 	distance = math.sqrt((x2-x)**2+(y2-y)**2)
 	return distance
 
-def setProperties(classname):
-	return []
-
 # Functions for creating all the different shapes
 # Create polygons, convex or concave (the concave polygon is triangulated)
-def definePoly():
-	global CLIPPINGRADIUS, clock, world, leveldata
+def defineGroundPoly():
+	global CLIPPINGRADIUS, clock, world
 	center = lastCameraPos+Vec2d(pygame.mouse.get_pos())
 	points = [Vec2d(center.x, center.y)]
 	polypoints = [Vec2d(0, 0)]
@@ -94,10 +89,7 @@ def definePoly():
 						if pymunk.util.is_convex(points):
 							for vert in polypoints:
 									polypoints[polypoints.index(vert)] = vert.int_tuple
-							poly = Poly(world, center, polypoints)
-							index = len(leveldata)
-							leveldata.append(('Poly', center, polypoints))
-							objects[poly] = index
+							poly = GroundPoly(world, center.int_tuple, polypoints)
 							return
 						else:
 							triangles = pymunk.util.triangulate(polypoints)
@@ -105,10 +97,7 @@ def definePoly():
 							for pointslist in polys:
 								for vert in pointslist:
 									pointslist[pointslist.index(vert)] = vert.int_tuple
-								poly = Poly(world, center.int_tuple, pointslist)
-								index = len(leveldata)
-								leveldata.append(('Poly', center.int_tuple, pointslist))
-								objects[poly] = index
+								poly = GroundPoly(world, center.int_tuple, pointslist)
 							return
 			polypoints.append((Vec2d(e.pos)-(center))+lastCameraPos)
 			points.append(lastCameraPos+Vec2d(e.pos))
@@ -125,19 +114,9 @@ def definePoly():
 		clock.tick(FPS)
 		pygame.display.update()
 	return
-def editPoly(data):
-	print data
-	return
-def editClimber(climber, index):
-	global world
-	leveldata.pop(index)
-	print world.getObjects()
-	world.removeObject(climber)
-	print world.getObjects()
-	return
+
 # Create circles
 def defineCircle():
-	global leveldata, world
 	center = Vector.from_tuple(pygame.mouse.get_pos())
 	radius = 0
 	while True:
@@ -153,9 +132,6 @@ def defineCircle():
 				return
 		elif e.type == pygame.MOUSEBUTTONDOWN:
 			circle = Circle(world, center.int_tuple(), radius)
-			index = len(leveldata)
-			leveldata.append(('Circle',  center.int_tuple(), radius))
-			objects[circle] = index
 			return
 		pos = pygame.mouse.get_pos()
 		radius = (center-Vector.from_tuple(pos)).get_mag()
@@ -167,30 +143,20 @@ def defineCircle():
 	return
 # Convienience function for creating goals
 def defineGoal():
-	global leveldata, world
 	pos = pygame.mouse.get_pos()
 	Goal(world, pos)
-	leveldata.append(['Goal', pos])
 # Drop climbers
 def defineClimber():
-	global leveldata, world
 	pos = lastCameraPos+pygame.mouse.get_pos()
 	climber = Climber(world, pos.int_tuple)
-	index = len(leveldata)
-	leveldata.append(['Climber', pos.int_tuple])
-	objects[climber] = index
+	return
 # Convienience function for creating springs
 def defineSpring():
-	global leveldata, world
 	pos = pygame.mouse.get_pos()
 	spring = Spring(world, pos)
-	index = len(leveldata)
-	leveldata.append(['Spring', pos])
-	objects[spring] = index
 	return
 # Convienience function for creating perfect rectangles
 def defineBlock():
-	global leveldata, world
 	startpos = pygame.mouse.get_pos()
 	endpos = pygame.mouse.get_pos()
 	width, height = (endpos[0]-startpos[0], endpos[1]-startpos[1])
@@ -207,9 +173,6 @@ def defineBlock():
 				return
 		elif e.type == pygame.MOUSEBUTTONDOWN:
 			block = Block(world, (startpos[0]+width/2, startpos[1]+height/2), (width, height))
-			index = len(leveldata)
-			leveldata.append(['Block', (startpos[0]+width/2, startpos[1]+height/2), (width, height)])
-			objects[block] = index
 			return
 		endpos = pygame.mouse.get_pos()
 		screen.blit(background, (0, 0))
@@ -220,48 +183,14 @@ def defineBlock():
 		clock.tick(FPS)
 		pygame.display.update()
 	return
-# Convienience function for creating death areas
-def defineDeathBox():
-	global leveldata, world
-	startpos = pygame.mouse.get_pos()
-	endpos = pygame.mouse.get_pos()
-	width, height = (endpos[0]-startpos[0], endpos[1]-startpos[1])
-	while True:
-		e = pygame.event.poll()
-		if e.type == pygame.QUIT:
-			pygame.quit()
-			exit()
-		elif e.type == pygame.KEYDOWN:
-			if e.key == pygame.K_ESCAPE:
-				pygame.quit()
-				exit()
-			elif e.key == pygame.K_BACKSPACE:
-				return
-		elif e.type == pygame.MOUSEBUTTONUP:
-			world.addObject(DeathBox(world, (startpos[0]+width/2, startpos[1]+height/2), (width, height)))
-			leveldata.append(('DeathBox', (startpos[0]+width/2, startpos[1]+height/2), (width, height)))
-			return
-		endpos = pygame.mouse.get_pos()
-		screen.blit(background, (0, 0))
-		world.draw()
-		width, height = (endpos[0]-startpos[0], endpos[1]-startpos[1])
-		pygame.draw.rect(screen, (255, 0, 0), (startpos, (width, height)))
-		drawHelpers()
-		clock.tick(FPS)
-		pygame.display.update()
-	return
 def defineNPC():
-	pos = pygame.mouse.get_pos()
-	enemy = NPC(world, pos)
-	index = len(leveldata)
-	leveldata.append(['NPC', pos])
-	objects[enemy] = index
+	pos = lastCameraPos+pygame.mouse.get_pos()
+	enemy = NPC(world, pos.int_tuple)
 # Function for putting text into the world
 def defineText():
 	pos = pygame.mouse.get_pos()
 	text = raw_input('Enter text: ')
 	Text(world, pos, "'"+text+"'")
-	leveldata.append(('Text', pos, "'"+text+"'"))
 	return
 # Draws the cursor lines
 def drawHelpers():
@@ -282,6 +211,7 @@ def drawHelpers():
 	world.camera.move(vec)
 	lastCameraPos += vec
 	return
+
 # Function for defining ropes
 def defineRope():
 	position = pygame.mouse.get_pos()
@@ -299,9 +229,6 @@ def defineRope():
 		elif e.type == pygame.MOUSEBUTTONDOWN:
 			length = abs(e.pos[1]-position[1])
 			rope = Rope(world, position, length)
-			index = len(leveldata)
-			leveldata.append(('Rope', position, length))
-			objects[rope] = index
 			return
 		endpos = list(pygame.mouse.get_pos())
 		screen.blit(background, (0, 0))
@@ -314,27 +241,49 @@ def defineRope():
 
 def setProperties(position):
 	shapes = world.space.point_query(lastCameraPos+position)
-	index = -1
-	editObject = None
 	for shape in shapes:
 		for ob in world.getObjects():
 			try:
 				if ob.shape == shape:
-					index = objects[ob]
-					editObject = ob
+					world.removeObject(ob)
+					del ob
 					break
 			except:
 				if shape in ob.shapes:
-					index = objects[ob]
-					editObject = ob
+					world.removeObject(ob)
+					del ob
 					break
-	if index != -1:
-		leveldata.pop(index)
-		world.removeObject(editObject)
-		return
 	return
+
+def getData():
+	# Loads a list version of the data in the World class so it can be rebuilt.
+	pickledata = []
+	objects = world.getObjects()
+	for ob in objects:
+		if isinstance(ob, Climber):
+			pickledata.append(('Climber', ob.shape.body.position.int_tuple))
+		if isinstance(ob, GroundPoly):
+			pickledata.append(('GroundPoly', ob.shape.body.position.int_tuple, ob.shape.get_points(), ob.shape.body.is_static))
+		if isinstance(ob, DeathPoly):
+			pickledata.append(('DeathPoly', ob.shape.body.position.int_tuple, ob.shape.get_points(), ob.shape.body.is_static))
+		if isinstance(ob, ClingPoly):
+			pickledata.append(('ClingPoly', ob.shape.body.position.int_tuple, ob.shape.get_points(), ob.shape.body.is_static))
+		if isinstance(ob, AlivePoly):
+			pickledata.append(('AlivePoly', ob.shape.body.position.int_tuple, ob.shape.get_points(), ob.shape.body.is_static))
+		if isinstance(ob, NPC):
+			pickledata.append(('NPC', ob.shape.body.position.int_tuple))
+		if isinstance(ob, GroundCircle):
+			pickledata.append(('GroundCircle', ob.shape.body.position.int_tuple, int(ob.shape.radius), ob.shape.body.is_static))
+		if isinstance(ob, DeathCircle):
+			pickledata.append(('DeathCircle', ob.shape.body.position.int_tuple, int(ob.shape.radius), ob.shape.body.is_static))
+		if isinstance(ob, ClingCircle):
+			pickledata.append(('ClingCircle', ob.shape.body.position.int_tuple, int(ob.shape.radius), ob.shape.body.is_static))
+		if isinstance(ob, AliveCircle):
+			pickledata.append(('AliveCircle', ob.shape.body.position.int_tuple, int(ob.shape.radius), ob.shape.body.is_static))
+		if isinstance(ob, Rope):
+			pickledata.append(('Rope', ob.shapes[0].body.position.int_tuple, ob.length))
+	return pickledata
 def main():
-	global leveldata
 	# Create all the menu images and things
 	items = []
 	polyimage = pygame.Surface((28, 28))
@@ -363,7 +312,7 @@ def main():
 	pygame.draw.line(ropeimage, (255, 170, 50), (14, 0), (14, 28), 1)
 	enemyimage = pygame.Surface((28, 28))
 	pygame.draw.circle(enemyimage, (200, 200, 200), (14, 14), 14)
-	items.extend([Item(polyimage, 'Poly'), Item(climberimage, 'Climber'), Item(goalimage, 'Goal'),
+	items.extend([Item(polyimage, 'GroundPoly'), Item(climberimage, 'Climber'), Item(goalimage, 'Goal'),
 		Item(springimage, 'Spring'), Item(deathboximage, 'DeathBox'), Item(blockimage, 'Block'),
 		Item(circleimage, 'Circle'), Item(textimage, 'Text'), Item(ropeimage, 'Rope'), Item(enemyimage, 'NPC')])
 	menu = Menu(Vector(WIDTH, 0), items)
@@ -385,18 +334,15 @@ def main():
 						name = os.path.join(LEVELFOLDER, name)
 						print name
 						filename = open(name, 'w')
-						pickle.dump(leveldata, filename)
+						pickle.dump(getData(), filename)
 						filename.close()
 					except:
 						pass
 				elif e.key == pygame.K_c:
 					world.clear()
-					leveldata = []
-					objects = {}
 				elif e.key == pygame.K_SPACE:
 					newworld = World()
-					loadLevel(newworld, leveldata)
-					loadLevel(world, leveldata)
+					loadLevel(newworld, getData())
 					while world.complete == False:
 						e = pygame.event.poll()
 						if e.type == pygame.QUIT:
@@ -423,7 +369,7 @@ def main():
 		world.draw()
 		if world.complete == True:
 			world.clear()
-			loadLevel(world, leveldata)
+			loadLevel(world, getData())
 		menu.update()
 		drawHelpers()
 		clock.tick(FPS)

@@ -91,4 +91,4 @@ ENEMYSPEED = 70
 CAMERAX = 300
 CAMERAY = 220
 # How much 'floatiness' the player's head has
-PLAYERHEADFLOAT = -200
+PLAYERHEADFLOAT = -100

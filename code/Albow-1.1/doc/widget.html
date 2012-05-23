@@ -1,0 +1,148 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head><meta content="text/html; charset=ISO-8859-1" http-equiv="content-type"><title>Widget</title></head>
+<body>
+<h1>class <span style="font-family: monospace;">widget.Widget(object)</span></h1>
+The Widget class is the base class for all widgets. A widget occupies a
+rectangular area of the PyGame screen to which all drawing in it is
+clipped, and it may receive mouse and keyboard events. A widget may
+also contain subwidgets.<br>
+<br>
+<span style="font-style: italic;">NOTE:</span> Due to a limitation of
+PyGame subsurfaces, a widget's rectangle must be entirely contained
+within that of its parent widget. An exception will occur if this is
+violated.<br>
+<h2>Constructor</h2>
+<div style="margin-left: 40px;">
+<dl><dt style="font-family: monospace;">Widget(rect = None)</dt><dd>Creates a new widget, initially without any parent. If a rect is given, it becomes the new widget's rectangle.<br><br>WARNING: If you pass a Rect object for the <span style="font-style: italic;">rect</span> parameter, it is <span style="font-weight: bold;">not copied</span>. Since pygame Rects are mutable, this is something to be careful about.<br>
+  </dd></dl>
+</div>
+<h2>Attributes</h2>
+<div style="margin-left: 40px;">
+<dl>
+  <dt style="font-family: monospace;">rect</dt>
+  <dd>A PyGame rectangle defining the portion of the parent widget's
+coordinate system occupied by the widget. Modifying this rectangle
+changes the widget's size and position.<br>
+    <br>
+  </dd>
+  <dt style="font-family: monospace;">parent</dt>
+  <dd><span style="font-style: italic;">Read-only.</span> The widget
+having this widget as a subwidget, or None if the widget is not
+contained in another widget. A widget must ultimately be contained in
+the root widget in order to be drawn and to receive events.</dd></dl></div><dl style="margin-left: 40px;"><dt style="font-family: monospace;">visible</dt><dd>When true, the widget is visible and active. When false, the widget is invisible and will not receive events. Defaults to true.</dd></dl>
+<h2>Theme Properties</h2><dl style="margin-left: 40px;"><dt style="font-family: monospace;">fg_color</dt><dd>Foreground
+colour for the contents of the widget. How this property is used
+depends on the widget. Some widgets have additional colour properties
+for specific parts of the widget.</dd></dl><dl style="margin-left: 40px;"><dt style="font-family: monospace;">bg_color</dt><dd>Background colour of the widget. If specified, the widget's rect
+is filled with this colour before drawing its contents. If no
+background colour is specified or it is set to None, the widget has no
+background and is drawn transparently over its parent. For most
+widgets, it defaults to None.</dd></dl><dl style="margin-left: 40px;"><dt style="font-family: monospace;">font</dt><dd>Font to use for drawing text in the widget. How this property is used depends on the widget. Some widgets have
+additional font properties for specific parts of the widget.</dd></dl><dl style="margin-left: 40px;"><dt style="font-family: monospace;">border_width</dt><dd>Width of a border to be drawn inside the outer edge of the widget. If this is unspecified or set to zero, no border is drawn.</dd></dl><dl style="margin-left: 40px;"><dt style="font-family: monospace;">border_color</dt><dd>Colour in which to draw the border specified by <span style="font-family: monospace;">border_width</span>.</dd></dl><dl style="margin-left: 40px;"><dt style="font-family: monospace;">margin</dt><dd>The amount of space to leave between the edge of the widget and its contents. Note that this distance includes the <span style="font-family: monospace;">border_width</span>, e.g. if border_width == 1 and margin == 3, then there is 2 pixels of space between the inside of the border and the contents.<br><br>Most of the predefined Albow widgets honour the <span style="font-family: monospace;">margin</span> property, but this is not automatic for your own widget subclasses. You may find the <span style="font-family: monospace;">get_margin_rect()</span> method helpful in implementing support for the <span style="font-family: monospace;">margin</span> property in your widget classes.</dd></dl><h2>Methods</h2>
+<div style="margin-left: 40px;">
+<dl>
+  <dt style="font-family: monospace;">add(subwidget)</dt>
+  <dd>Adds the given widget as a subwidget of this widget.<br>
+    <br>
+  </dd>
+  <dt style="font-family: monospace;">remove(subwidget)</dt>
+  <dd>If the given widget is a subwidget of this widget, it is removed and its <span style="font-family: monospace;">parent</span> attribute is set to None.<br>
+    <br>
+  </dd>
+  <dt style="font-family: monospace;">set_parent(self, parent)</dt>
+  <dd>Changes the parent of this widget to the given widget. This is an
+alternative to using the add and remove methods of the parent widget.
+Setting the parent to None removes the widget from any parent.<br>
+    <br>
+  </dd>
+  <dt style="font-family: monospace;">call_handler(self, name, *args)</dt>
+  <dd>If the widget has a method with the given <span style="font-style: italic;">name</span>, it is called with the given <span style="font-style: italic;">args</span>, and True is returned. Otherwise, nothing is done and False is returned.<br>
+    <br>
+  </dd>
+  <dt style="font-family: monospace;">call_parent_handler(self, name, *args)</dt>
+  <dd>Invokes <span style="font-family: monospace;">call_handler</span> on the parent of this widget, if any. This can be used to pass an event on to a parent widget if you don't want to handle it.<br>
+    <br>
+  </dd>
+  <dt style="font-family: monospace;">global_to_local(coords)</dt>
+  <dd>Converts the given coordinate pair from PyGame screen coordinates to the widget's local coordinate system.<br>
+    <br>
+  </dd>
+  <dt style="font-family: monospace;">local_to_global(coords)</dt>
+  <dd>Converts the given coordinate pair from the widget's local coordinate system to PyGame screen coordinates.<br>
+    <br>
+  </dd>
+  <dt style="font-family: monospace;"><a name="present"></a>present()</dt>
+  <dd>Presents the widget as a modal dialog. The widget is added as a
+subwidget of the root widget and centered within it, and a nested event
+loop is entered in which any events for widgets other than this widget
+and its subwidgets are ignored. Control is retained until this widget's
+    <span style="font-family: monospace;">dismiss</span> method is called. The argument to <span style="font-family: monospace;">dismiss</span> is returned from the <span style="font-family: monospace;">present</span> call.<br>
+    <br>
+  </dd>
+  <dt style="font-family: monospace;"><a name="dismiss"></a>dismiss(result)</dt>
+  <dd>When the widget is being presented modally using <span style="font-family: monospace;">present()</span>, causes the modal event loop to exit and the <span style="font-family: monospace;">present()</span> call to return with the given <span style="font-style: italic;">result</span>.<br>
+    <br>
+  </dd>
+  <dt style="font-family: monospace;">get_root()</dt>
+  <dd>Returns the root widget (whether this widget is contained within it or not).<br>
+    <br>
+  </dd>
+  <dt style="font-family: monospace;">focus()</dt>
+  <dd>Gives this widget the keyboard focus. The widget must be visible
+(i.e. contained within the root widget) for this to have any effect.<br>
+    <br>
+  </dd>
+  <dt style="font-family: monospace;">has_focus()</dt>
+  <dd>Returns true if the widget currently has the keyboard focus.</dd>
+</dl><dl><dt style="font-family: monospace;">get_margin_rect()</dt><dd>Returns a Rect in local coordinates representing the content area of the widget, as determined by its <span style="font-family: monospace;">margin</span> property.</dd></dl><dl><dt style="font-family: monospace;">set_size_for_text(width, nlines = 1)</dt><dd>Sets
+the widget's Rect to a suitable size for displaying text of the
+specified width and number of lines in its current font, as determined
+by the <span style="font-family: monospace;">font</span> property. The <span style="font-style: italic;">width</span> can be either a number of pixels or a piece of sample text.</dd></dl><dl><dt style="font-family: monospace;"><a name="invalidate"></a>invalidate()</dt><dd>Marks the widget as needing to be redrawn. You will need to call this from the <a href="root.html#begin_frame"><span style="font-family: monospace;">begin_frame()</span></a> method of your <a href="shell.html">Shell</a> or <a href="screen.html">Screen</a> if you have the <span style="font-family: monospace;">redraw_every_frame</span> attribute of the root widget set to False.<br><br>NOTE:
+Currently, calling this method on any widget will cause all widgets to
+be redrawn on next return to the event loop. Future versions may be
+more selective.</dd></dl>
+</div>
+<h2>Abstract Methods</h2>
+<div style="margin-left: 40px;">
+<dl>
+  <dt style="font-family: monospace;">draw(surface)</dt>
+  <dd>Called whenever the widget's contents need to be drawn. The <span style="font-style: italic;">surface</span> is a subsurface the same size as the widget's rect with the drawing origin at its top left corner.<br><br>The
+widget is filled with its background colour, if any, before this method
+is called. The border and subwidgets, if any, are drawn after this
+method returns.</dd></dl></div><dl style="margin-left: 40px;"><dt style="font-family: monospace;">draw_over(surface)</dt><dd>Called
+after drawing all the subwidgets of this widget. This method can be
+used to draw content that is to appear on top of any subwidgets.<br></dd></dl><div style="margin-left: 40px;"><dl>
+  <dt style="font-family: monospace;">mouse_down(event)</dt>
+  <dd>Called when a mouse button press event occurs in the widget.<br>
+    <br>
+  </dd>
+  <dt style="font-family: monospace;">mouse_drag(event)</dt>
+  <dd>Called when a mouse movement event occurs with a mouse button held down following a mouse-down event in this widget.<br>
+    <br>
+  </dd>
+  <dt style="font-family: monospace;">mouse_up(event)</dt>
+  <dd>Called when a mouse button release event occurs following a mouse-down event in this widget.<br>
+    <br>
+  </dd>
+  <dt style="font-family: monospace;">mouse_move(event)</dt>
+  <dd>Called when a mouse movement event occurs in this widget with no mouse button down.<br>
+    <br>
+  </dd>
+  <dt style="font-family: monospace;">key_down(event)</dt>
+  <dd>Called when a key press event occurs and this widget has the
+keyboard focus, or a subwidget has the focus but did not handle the
+event.<br><br>NOTE: If you override this method and don't want to handle a key_down event, be sure to call the inherited <span style="font-family: monospace;">key_down()</span> method to pass the event to the parent widget.<br>
+    <br>
+  </dd>
+  <dt style="font-family: monospace;">key_up(event)</dt>
+  <dd>Called when a key release event occurs and this widget has the keyboard focus.<br><br>NOTE: If you  override this method and don't want to handle a key_up event, be sure to call the inherited <span style="font-family: monospace;">key_up()</span> method to pass the event to the parent widget.</dd>
+</dl><dl><dt style="font-family: monospace;">get_cursor(event)</dt><dd>Called
+to determine the appropriate cursor to display over the widget. The
+event is an event object containing the mouse coordinates to be used in
+determining the cursor. Should return a cursor in the form of a tuple
+of arguments to set_cursor(), or None to use the standard arrow cursor. (The <a href="resource_functions.html#get_cursor">get_cursor()</a> resource function returns a suitable tuple.)</dd></dl>
+</div>
+---<br>
+<br>
+<br>
+</body></html>

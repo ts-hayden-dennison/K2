@@ -70,13 +70,33 @@ class Block(Object):
 # A simple convex polygon that you can stand on.
 # Pass it a world, position, and some vertices (given in local coordinates from the position
 # Optional arguments: static, mass, friction, elasticity, collision type
-class Poly(Object):
-	def __init__(self, world, position, vertices, static=True, collision=GROUNDCOLLISIONTYPE, mass=20, friction=0.5, elasticity=0.5):
+class GroundPoly(Object):
+	def __init__(self, world, position, vertices, static=True, mass=20, friction=0.5, elasticity=0.5):
 		global GROUNDCOLLISIONTYPE
 		pygame.sprite.Sprite.__init__(self)
 		self.vertices = vertices
 		self.shape = createPolygon(position, vertices, mass, friction, elasticity, static)
-		self.shape.collision_type = collision
+		self.shape.collision_type = GROUNDCOLLISIONTYPE
+		world.addObject(self)
+		if static == True:
+			world.space.add_static(self.shape)
+		else:
+			world.space.add(self.shape.body, self.shape)
+		return
+	def Draw(self, world):
+		points = self.shape.get_points()
+		for p in points:
+			points[points.index(p)] = world.camera.findPos(p)
+		pygame.draw.polygon(world.screen, (0, 255, 10), points, random.choice((0, 0, 0, 0, 0, 0, 0, 2, 3, 4)))
+		return
+
+class DeathPoly(Object):
+	def __init__(self, world, position, vertices, static=True, mass=20, friction=0.5, elasticity=0.5):
+		global DEATHCOLLISIONTYPE
+		pygame.sprite.Sprite.__init__(self)
+		self.vertices = vertices
+		self.shape = createPolygon(position, vertices, mass, friction, elasticity, static)
+		self.shape.collision_type = DEATHCOLLISIONTYPE
 		world.addObject(self)
 		if static == True:
 			world.space.add_static(self.shape)
@@ -90,15 +110,97 @@ class Poly(Object):
 		pygame.draw.polygon(world.screen, (255, 255, 255), points)
 		pygame.draw.polygon(world.screen, (255, 0, 0), points, 2)
 		return
+
+class ClingPoly(Object):
+	def __init__(self, world, position, vertices, static=True, mass=20, friction=0.5, elasticity=0.5):
+		global ROPECOLLISIONTYPE
+		pygame.sprite.Sprite.__init__(self)
+		self.vertices = vertices
+		self.shape = createPolygon(position, vertices, mass, friction, elasticity, static)
+		self.shape.collision_type = ROPECOLLISIONTYPE
+		world.addObject(self)
+		if static == True:
+			world.space.add_static(self.shape)
+		else:
+			world.space.add(self.shape.body, self.shape)
+		return
+	def Draw(self, world):
+		points = self.shape.get_points()
+		for p in points:
+			points[points.index(p)] = world.camera.findPos(p)
+		pygame.draw.polygon(world.screen, (255, 255, 255), points)
+		pygame.draw.polygon(world.screen, (255, 0, 0), points, 2)
+		return
+
+class AlivePoly(Object):
+	def __init__(self, world, position, vertices, static=False, mass=20, friction=0.5, elasticity=0.5):
+		global PLAYERCOLLISIONTYPE
+		pygame.sprite.Sprite.__init__(self)
+		self.vertices = vertices
+		self.shape = createPolygon(position, vertices, mass, friction, elasticity, static)
+		self.shape.collision_type = PLAYERCOLLISIONTYPE
+		world.addObject(self)
+		if static == True:
+			world.space.add_static(self.shape)
+		else:
+			world.space.add(self.shape.body, self.shape)
+		return
+	def Draw(self, world):
+		points = self.shape.get_points()
+		for p in points:
+			points[points.index(p)] = world.camera.findPos(p)
+		pygame.draw.polygon(world.screen, (255, 255, 255), points)
+		pygame.draw.polygon(world.screen, (255, 0, 0), points, 2)
+		return
+
 # A circle
 # Pass it a world, position, and radius
 # Optional arguments: mass, friction, elasticity, collision type
-class Circle(Object):
-	def __init__(self, world, position, radius, static=True, collision=GROUNDCOLLISIONTYPE, mass=20, friction=0.5, elasticity=0.5):
+class GroundCircle(Object):
+	def __init__(self, world, position, radius, static=True, mass=20, friction=0.5, elasticity=0.5):
 		global GROUNDCOLLISIONTYPE
 		pygame.sprite.Sprite.__init__(self)
 		self.shape = createBall(position, radius, mass, friction, elasticity, static)
-		self.shape.collision_type = collision
+		self.shape.collision_type = GROUNDCOLLISIONTYPE
+		world.addObject(self)
+		if not static:
+			world.space.add(self.shape.body, self.shape)
+		else:
+			world.space.add_static(self.shape)
+		return
+
+class DeathCircle(Object):
+	def __init__(self, world, position, radius, static=True, mass=20, friction=0.5, elasticity=0.5):
+		global DEATHCOLLISIONTYPE
+		pygame.sprite.Sprite.__init__(self)
+		self.shape = createBall(position, radius, mass, friction, elasticity, static)
+		self.shape.collision_type = DEATHCOLLISIONTYPE
+		world.addObject(self)
+		if not static:
+			world.space.add(self.shape.body, self.shape)
+		else:
+			world.space.add_static(self.shape)
+		return
+
+class ClingCircle(Object):
+	def __init__(self, world, position, radius, static=True, mass=20, friction=0.5, elasticity=0.5):
+		global ROPECOLLISIONTYPE
+		pygame.sprite.Sprite.__init__(self)
+		self.shape = createBall(position, radius, mass, friction, elasticity, static)
+		self.shape.collision_type = ROPECOLLISIONTYPE
+		world.addObject(self)
+		if not static:
+			world.space.add(self.shape.body, self.shape)
+		else:
+			world.space.add_static(self.shape)
+		return
+
+class AliveCircle(Object):
+	def __init__(self, world, position, radius, static=False, mass=20, friction=0.5, elasticity=0.5):
+		global PLAYERCOLLISIONTYPE
+		pygame.sprite.Sprite.__init__(self)
+		self.shape = createBall(position, radius, mass, friction, elasticity, static)
+		self.shape.collision_type = PLAYERCOLLISIONTYPE
 		world.addObject(self)
 		if not static:
 			world.space.add(self.shape.body, self.shape)
@@ -110,12 +212,13 @@ class Circle(Object):
 class Rope(Object):
 	def __init__(self, world, position, length, mass=20, friction=0.4, elasticity=0.1):
 		pygame.sprite.Sprite.__init__(self)
+		self.length = length
 		self.shapes = []
 		self.setupLinks(world, position, length, mass, friction, elasticity)
 		world.addObject(self)
 	def Draw(self, world):
 		for shape in self.shapes:
-			pygame.draw.circle(world.screen, (255, 170, 50), world.camera.findPos(shape.body.position), int(shape.radius))
+			pygame.draw.circle(world.screen, (255, 170, 50), world.camera.findPos(shape.body.position).int_tuple, int(shape.radius))
 		return
 	def setupLinks(self, world, position, length, mass, friction, elasticity):
 		global ROPESIZE
@@ -146,24 +249,6 @@ class Text(Object):
 		world.addObject(self)
 	def Draw(self, world):
 		world.screen.blit(self.image, self.position)
-		return
-
-# A box that is painted red. And kills climbers
-# Can be static or not
-class DeathBox(Object):
-	def __init__(self, world, position, size, static=True):
-		pygame.sprite.Sprite.__init__(self)
-		self.size = size
-		self.shape = createBox(position, self.size, 1, 0.0, 0.0, static)
-		self.shape.collision_type = DEATHCOLLISIONTYPE
-		world.addObject(self)
-		if static == True:
-			world.space.add_static(self.shape)
-		else:
-			world.space.add(self.shape.body, self.shape)
-	def Draw(self, world):
-		pygame.draw.polygon(world.screen, (250, 200, 200), self.shape.get_points())
-		pygame.draw.polygon(world.screen, (100, 50, 50), self.shape.get_points(), 4)
 		return
 
 # An object that is extremely bouncy
